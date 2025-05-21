@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ authority.name }} - MyCure{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Authority Information -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        {% if authority.logo %}
+                            <img src="{{ authority.logo.url }}" alt="{{ authority.name }}" class="rounded me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-hospital text-secondary" style="font-size: 2rem;"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h2 class="h3 mb-1">{{ authority.name }}</h2>
+                            <p class="text-muted mb-0">{{ authority.get_authority_type_display }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>About</h5>
+                        <p>{{ authority.description }}</p>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Contact Information</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                    {{ authority.address }}, {{ authority.city }}, {{ authority.state }} - {{ authority.pincode }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-phone text-primary me-2"></i>
+                                    {{ authority.phone }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                    {{ authority.email }}
+                                </li>
+                                {% if authority.website %}
+                                <li class="mb-2">
+                                    <i class="fas fa-globe text-primary me-2"></i>
+                                    <a href="{{ authority.website }}" target="_blank">{{ authority.website }}</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Timings</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    {{ authority.opening_time }} - {{ authority.closing_time }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-calendar text-primary me-2"></i>
+                                    {% if authority.open_on_weekends %}
+                                        Open on weekends
+                                    {% else %}
+                                        Closed on weekends
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Services -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Available Services</h5>
+                </div>
+                <div class="card-body">
+                    {% if services %}
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            {% for service in services %}
+                                <div class="col">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ service.name }}</h5>
+                                            <p class="card-text small">{{ service.description|truncatechars:100 }}</p>
+                                            <p class="card-text"><strong>₹{{ service.price }}</strong></p>
+                                            <a href="{% url 'service_detail' service.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                            <a href="{% url 'book_appointment' service.id %}" class="btn btn-sm btn-primary">Book Now</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted">No services available at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Doctors -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Our Doctors</h5>
+                </div>
+                <div class="card-body">
+                    {% if doctors %}
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            {% for doctor in doctors %}
+                                <div class="col">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                {% if doctor.photo %}
+                                                    <img src="{{ doctor.photo.url }}" alt="Dr. {{ doctor.name }}" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                                {% else %}
+                                                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                                                        <i class="fas fa-user-md text-secondary"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <h5 class="card-title mb-0">Dr. {{ doctor.name }}</h5>
+                                                    <p class="card-text text-muted small">{{ doctor.specialization }}</p>
+                                                </div>
+                                            </div>
+                                            <p class="card-text small">{{ doctor.bio|truncatechars:100 }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted">No doctors available at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Contact -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Quick Contact</h5>
+                </div>
+                <div class="card-body">
+                    <p>Have questions? Contact {{ authority.name }} directly:</p>
+                    <div class="d-grid gap-2">
+                        <a href="tel:{{ authority.phone }}" class="btn btn-outline-primary">
+                            <i class="fas fa-phone me-2"></i>Call Now
+                        </a>
+                        <a href="mailto:{{ authority.email }}" class="btn btn-outline-primary">
+                            <i class="fas fa-envelope me-2"></i>Send Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Book Appointment -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Book an Appointment</h5>
+                </div>
+                <div class="card-body">
+                    <p>Select from our range of services and book your appointment today.</p>
+                    {% if services %}
+                        <form action="{% url 'book_appointment' 0 %}" method="get" id="sidebar-booking-form">
+                            <div class="mb-3">
+                                <select name="service_id" class="form-select" id="service-select">
+                                    <option value="">Select a service</option>
+                                    {% for service in services %}
+                                        <option value="{{ service.id }}">{{ service.name }} - ₹{{ service.price }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-primary" id="sidebar-book-btn">Book Now</button>
+                            </div>
+                        </form>
+                        
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Handle the sidebar booking button click
+                                document.getElementById('sidebar-book-btn').addEventListener('click', function() {
+                                    const serviceSelect = document.getElementById('service-select');
+                                    const serviceId = serviceSelect.value;
+                                    
+                                    if (serviceId) {
+                                        // Redirect to the booking page for the selected service
+                                        window.location.href = "{% url 'book_appointment' 0 %}".replace('0', serviceId);
+                                    } else {
+                                        alert('Please select a service first.');
+                                    }
+                                });
+                            });
+                        </script>
+                    {% else %}
+                        <div class="text-center py-2">
+                            <p class="text-muted">No services available for booking at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Location -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Location</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ authority.address }}, {{ authority.city }}, {{ authority.state }} - {{ authority.pincode }}</p>
+                    <div class="ratio ratio-4x3 mt-3 bg-light">
+                        <!-- Map placeholder -->
+                        <div class="d-flex align-items-center justify-content-center">
+                            <p class="text-center text-muted">
+                                <i class="fas fa-map-marked-alt fa-3x mb-3"></i><br>
+                                Map location available in full version
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

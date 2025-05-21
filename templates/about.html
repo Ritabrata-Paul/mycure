@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- About Header Section -->
+<section class="page-title bg-1">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="block text-center">
+          <span class="text-white">About Us</span>
+          <h1 class="text-capitalize mb-5 text-lg">Our Company</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section class="section about-page">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4">
+        <h2 class="title-color">Personal care for your healthy living</h2>
+      </div>
+      <div class="col-lg-8">
+        <p>MyCure is a pioneering healthcare platform designed to bridge the gap between patients and healthcare providers. We believe that everyone deserves access to quality healthcare services without the hassle of traditional appointment systems.</p>
+        <p>Our mission is to transform the healthcare experience by providing an easy-to-use platform that connects patients with hospitals, clinics, and diagnostic centers. We're committed to making healthcare more accessible, efficient, and patient-centered.</p>
+        <img src="{% static 'homepage/images/about/sign.png' %}" alt="" class="img-fluid mt-4">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="section awards">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-4">
+        <h2 class="title-color">Our Platform Features</h2>
+        <div class="divider mt-4 mb-5 mb-lg-0"></div>
+      </div>
+      <div class="col-lg-8">
+        <div class="row">
+          <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="award-img">
+              <i class="icofont-search-document text-lg"></i>
+              <h4 class="mt-3">Easy Search</h4>
+              <p>Find doctors, hospitals, and services with our powerful search functionality</p>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="award-img">
+              <i class="icofont-calendar text-lg"></i>
+              <h4 class="mt-3">Online Booking</h4>
+              <p>Book appointments with healthcare providers anytime, anywhere</p>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="award-img">
+              <i class="icofont-ui-user text-lg"></i>
+              <h4 class="mt-3">User Profiles</h4>
+              <p>Manage your medical history and appointments in one place</p>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="award-img">
+              <i class="icofont-notification text-lg"></i>
+              <h4 class="mt-3">Reminders</h4>
+              <p>Never miss an appointment with automated notifications</p>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="award-img">
+              <i class="icofont-rating text-lg"></i>
+              <h4 class="mt-3">Reviews & Ratings</h4>
+              <p>Make informed decisions with patient reviews and ratings</p>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="award-img">
+              <i class="icofont-surgeon-alt text-lg"></i>
+              <h4 class="mt-3">Healthcare Network</h4>
+              <p>Access our growing network of trusted healthcare providers</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Team Section -->
+<section class="section team">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="section-title text-center">
+          <h2 class="mb-4">Meet Our Team</h2>
+          <div class="divider mx-auto my-4"></div>
+          <p>The dedicated individuals behind MyCure who work tirelessly to improve healthcare accessibility for all.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="team-block mb-5 mb-lg-0">
+          <img src="{% static 'homepage/images/team/1.jpg' %}" alt="" class="img-fluid w-100">
+          <div class="content">
+            <h4 class="mt-4 mb-0">John Matthews</h4>
+            <p>CEO & Founder</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="team-block mb-5 mb-lg-0">
+          <img src="{% static 'homepage/images/team/2.jpg' %}" alt="" class="img-fluid w-100">
+          <div class="content">
+            <h4 class="mt-4 mb-0">Sarah Johnson</h4>
+            <p>Chief Medical Officer</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="team-block mb-5 mb-lg-0">
+          <img src="{% static 'homepage/images/team/3.jpg' %}" alt="" class="img-fluid w-100">
+          <div class="content">
+            <h4 class="mt-4 mb-0">David Wilson</h4>
+            <p>CTO</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="team-block">
+          <img src="{% static 'homepage/images/team/4.jpg' %}" alt="" class="img-fluid w-100">
+          <div class="content">
+            <h4 class="mt-4 mb-0">Emily Parker</h4>
+            <p>Head of Operations</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonial Section -->
+<section class="section testimonial">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 offset-lg-6">
+        <div class="section-title">
+          <h2 class="mb-4">What Our Patients Say</h2>
+          <div class="divider  my-4"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row align-items-center">
+      <div class="col-lg-6 testimonial-wrap offset-lg-6">
+        <div class="testimonial-block">
+          <div class="client-info">
+            <h4>Incredible Experience!</h4>
+            <span>Robert Thompson</span>
+          </div>
+          <p>
+            MyCure made finding a specialist so easy. I was able to book an appointment with a cardiologist within minutes and the entire process was seamless. Highly recommended!
+          </p>
+          <i class="icofont-quote-right"></i>
+        </div>
+
+        <div class="testimonial-block">
+          <div class="client-info">
+            <h4>Time-Saving Platform</h4>
+            <span>Jessica Williams</span>
+          </div>
+          <p>
+            As a busy mom, MyCure has been a lifesaver. I can now book appointments for my family without spending hours on the phone. The reminders feature is particularly helpful!
+          </p>
+          <i class="icofont-quote-right"></i>
+        </div>
+
+        <div class="testimonial-block">
+          <div class="client-info">
+            <h4>Transformed Healthcare Access</h4>
+            <span>Michael Chen</span>
+          </div>
+          <p>
+            Living in a rural area, access to specialists was always a challenge. With MyCure, I can now find and book appointments with top healthcare providers. This platform has truly transformed healthcare accessibility.
+          </p>
+          <i class="icofont-quote-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Partners Section -->
+<section class="section clients gray-bg">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="section-title text-center">
+          <h2>Our Partners</h2>
+          <div class="divider mx-auto my-4"></div>
+          <p>We collaborate with leading healthcare institutions to provide you with the best care possible.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row clients-logo">
+      <div class="col-lg-2">
+        <div class="client-thumb">
+          <img src="{% static 'homepage/images/about/1.png' %}" alt="" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2">
+        <div class="client-thumb">
+          <img src="{% static 'homepage/images/about/2.png' %}" alt="" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2">
+        <div class="client-thumb">
+          <img src="{% static 'homepage/images/about/3.png' %}" alt="" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2">
+        <div class="client-thumb">
+          <img src="{% static 'homepage/images/about/4.png' %}" alt="" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2">
+        <div class="client-thumb">
+          <img src="{% static 'homepage/images/about/5.png' %}" alt="" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2">
+        <div class="client-thumb">
+          <img src="{% static 'homepage/images/about/6.png' %}" alt="" class="img-fluid">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

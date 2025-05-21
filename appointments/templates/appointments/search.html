@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Search for Healthcare Services{% endblock %}
+{% block extra_css %}
+<style>
+  /* Custom search page styles */
+  .search-hero {
+    background: linear-gradient(rgba(62, 100, 255, 0.9), rgba(30, 58, 138, 0.8)), url('https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center;
+    background-size: cover;
+    padding: 60px 0;
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 40px;
+  }
+  
+  .search-form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .search-title {
+    color: #fff;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+
+  .search-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 30px;
+  }
+
+  .form-control {
+    height: 50px;
+    border-radius: 8px;
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+    padding-left: 15px;
+  }
+
+  .form-control:focus {
+    border-color: #3e64ff;
+    box-shadow: 0 0 0 0.2rem rgba(62, 100, 255, 0.25);
+  }
+
+  .search-btn {
+    height: 50px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .search-icon {
+    font-size: 1.2rem;
+  }
+
+  .result-count {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .result-card {
+    transition: all 0.3s ease;
+    border: none;
+  }
+
+  .result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .result-img-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-color: #f8f9fa;
+    border-radius: 8px 0 0 8px;
+  }
+
+  .result-info {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-info i {
+    width: 20px;
+    text-align: center;
+  }
+
+  .result-title {
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 8px;
+  }
+
+  .result-description {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
+
+  .result-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .verified-badge {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+  }
+
+  .appointment-badge {
+    background-color: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
+  }
+
+  .view-details-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .view-details-btn:hover {
+    background-color: #3e64ff;
+    border-color: #3e64ff;
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .no-results {
+    background-color: rgba(14, 165, 233, 0.1);
+    border-left: 4px solid #0ea5e9;
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .search-hero {
+      padding: 40px 0;
+    }
+    
+    .search-form {
+      padding: 20px;
+    }
+    
+    .result-img-container {
+      height: 150px;
+      border-radius: 8px 8px 0 0;
+    }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<!-- Hero Section with Search Form -->
+<section class="search-hero">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h2 class="search-title display-5">Find the Right Healthcare Service</h2>
+        <p class="search-subtitle lead">Discover top-rated hospitals, clinics, and diagnostic centers near you</p>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="search-form">
+          <form method="get" action="{% url 'search' %}" class="row g-3">
+            <div class="col-md-5">
+              {{ form.search_query }}
+              <small class="form-text text-muted">Search for doctors, services, or facilities</small>
+            </div>
+            <div class="col-md-4">
+              {{ form.location }}
+              <small class="form-text text-muted">Enter city or state</small>
+            </div>
+            <div class="col-md-2">
+              {{ form.authority_type }}
+              <small class="form-text text-muted">Facility type</small>
+            </div>
+            <div class="col-md-1">
+              <button type="submit" class="btn btn-primary search-btn w-100">
+                <i class="fas fa-search search-icon"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Search Results Section -->
+<section class="search-results py-4">
+  <div class="container">
+    <div class="result-count">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Search Results <span class="text-muted">({{ authorities|length }} found)</span></h4>
+        <div class="d-flex align-items-center">
+          <span class="me-2 text-muted small">Sort by:</span>
+          <select class="form-select form-select-sm" style="width: auto;">
+            <option selected>Relevance</option>
+            <option>Rating</option>
+            <option>Distance</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    
+    {% if authorities %}
+      <div class="row g-4">
+        {% for authority in authorities %}
+          <div class="col-lg-6 mb-4">
+            <div class="card result-card h-100 shadow-sm">
+              <div class="row g-0">
+                <div class="col-md-4">
+                  <div class="result-img-container p-3">
+                    {% if authority.logo %}
+                      <img src="{{ authority.logo.url }}" class="img-fluid rounded" alt="{{ authority.name }}">
+                    {% else %}
+                      {% if authority.authority_type == 'HOSPITAL' %}
+                        <i class="fas fa-hospital fa-4x text-primary"></i>
+                      {% elif authority.authority_type == 'CLINIC' %}
+                        <i class="fas fa-clinic-medical fa-4x text-success"></i>
+                      {% elif authority.authority_type == 'DIAGNOSTIC' %}
+                        <i class="fas fa-microscope fa-4x text-info"></i>
+                      {% else %}
+                        <i class="fas fa-stethoscope fa-4x text-secondary"></i>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="card-body p-4">
+                    <h5 class="result-title">{{ authority.name }}</h5>
+                    <p class="result-info mb-2">
+                      <i class="fas fa-map-marker-alt text-primary"></i> 
+                      {{ authority.city }}, {{ authority.state }}
+                    </p>
+                    <p class="result-info mb-2">
+                      <i class="fas fa-clinic-medical text-primary"></i>
+                      {{ authority.get_authority_type_display }}
+                    </p>
+                    <p class="result-description">{{ authority.description|truncatewords:15 }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <span class="result-badge verified-badge me-2">
+                          <i class="fas fa-check-circle me-1"></i> Verified
+                        </span>
+                        
+                      </div>
+                      <a href="{% url 'authority_detail' authority.id %}" class="btn view-details-btn btn-outline-primary">
+                        View Details
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="no-results">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-info-circle fa-2x text-info me-3"></i>
+          <div>
+            <h5 class="mb-1">No Results Found</h5>
+            <p class="mb-0">No healthcare providers found matching your search criteria. Try adjusting your search terms or filtering options.</p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

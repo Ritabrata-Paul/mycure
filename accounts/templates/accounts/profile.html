@@ -1,0 +1,151 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Profile | MyCure{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">My Profile</h4>
+                </div>
+                <div class="card-body text-center">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle img-thumbnail mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="rounded-circle img-thumbnail mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% endif %}
+                    
+                    <h5>{{ user.get_full_name }}</h5>
+                    <p class="text-muted">{{ user.get_user_type_display }}</p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary">Edit Profile</a>
+                        <a href="{% url 'change_password' %}" class="btn btn-outline-secondary">Change Password</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Quick Links</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% if user.user_type == 'CUSTOMER' %}
+                        <a href="{% url 'my_appointments' %}" class="list-group-item list-group-item-action">
+                            <i class="fa fa-calendar me-2"></i> My Appointments
+                        </a>
+                    {% elif user.user_type == 'AUTHORITY' %}
+                        <a href="{% url 'authority_dashboard' %}" class="list-group-item list-group-item-action">
+                            <i class="fa fa-tachometer-alt me-2"></i> Dashboard
+                        </a>
+                        <a href="{% url 'authority_appointments' %}" class="list-group-item list-group-item-action">
+                            <i class="fa fa-calendar me-2"></i> Appointments
+                        </a>
+                        <a href="{% url 'manage_services' %}" class="list-group-item list-group-item-action">
+                            <i class="fa fa-cog me-2"></i> Services
+                        </a>
+                    {% elif user.user_type == 'ADMIN' %}
+                        <a href="{% url 'admin_dashboard' %}" class="list-group-item list-group-item-action">
+                            <i class="fa fa-tachometer-alt me-2"></i> Admin Dashboard
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+                        <i class="fa fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Personal Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Full Name:</div>
+                        <div class="col-md-8">{{ user.get_full_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Email:</div>
+                        <div class="col-md-8">{{ user.email }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Phone Number:</div>
+                        <div class="col-md-8">{{ user.phone_number }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">User Type:</div>
+                        <div class="col-md-8">{{ user.get_user_type_display }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Date Joined:</div>
+                        <div class="col-md-8">{{ user.date_joined|date:"F d, Y" }}</div>
+                    </div>
+                    {% if user.user_type == 'CUSTOMER' %}
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Age:</div>
+                            <div class="col-md-8">{{ user.age|default:"Not specified" }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Gender:</div>
+                            <div class="col-md-8">{{ user.get_gender_display|default:"Not specified" }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Address:</div>
+                            <div class="col-md-8">{{ user.address|default:"Not specified" }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if user.user_type == 'CUSTOMER' %}
+                <!-- Recent Appointments -->
+                <div class="card shadow">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Appointments</h5>
+                        <a href="{% url 'my_appointments' %}" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_appointments %}
+                            <div class="list-group">
+                                {% for appointment in recent_appointments %}
+                                    <a href="{% url 'appointment_detail' appointment.id %}" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ appointment.service.name }}</h6>
+                                            <small class="text-muted">{{ appointment.appointment_date|date:"M d, Y" }}</small>
+                                        </div>
+                                        <p class="mb-1">{{ appointment.authority.name }}</p>
+                                        <small class="text-muted">
+                                            {% if appointment.status == 'PENDING' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif appointment.status == 'APPROVED' %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% elif appointment.status == 'COMPLETED' %}
+                                                <span class="badge bg-info">Completed</span>
+                                            {% elif appointment.status == 'CANCELLED' %}
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            {% elif appointment.status == 'REJECTED' %}
+                                                <span class="badge bg-secondary">Rejected</span>
+                                            {% endif %}
+                                        </small>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <p class="text-muted">You don't have any appointments yet.</p>
+                                <a href="{% url 'search' %}" class="btn btn-primary">Book an Appointment</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

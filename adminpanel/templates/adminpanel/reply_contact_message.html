@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Reply to Message | MyCure Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Reply to Message</h1>
+        <a href="{% url 'contact_message_detail' message.id %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Message
+        </a>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <!-- Message Details -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">{{ message.subject }}</h5>
+                    <span class="text-muted small">Received on {{ message.created_at|date:"M d, Y H:i" }}</span>
+                </div>
+                <span class="badge {% if message.status == 'NEW' %}bg-danger
+                               {% elif message.status == 'READ' %}bg-warning
+                               {% elif message.status == 'REPLIED' %}bg-success
+                               {% endif %}">
+                    {{ message.get_status_display }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <p class="text-muted mb-1">From:</p>
+                    <p class="mb-0">{{ message.name }} ({{ message.email }})</p>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="message-content mt-3">
+                <p class="text-muted mb-1">Message:</p>
+                <div class="p-3 bg-light rounded">
+                    {{ message.message|linebreaks }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reply Form -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Your Reply</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    {{ form.reply.label_tag }}
+                    {{ form.reply }}
+                    {% if form.reply.errors %}
+                        <div class="text-danger">{{ form.reply.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="alert alert-info">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>
+                            <strong>Note:</strong> This reply will be sent to {{ message.email }} and will also be saved with this message.
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'contact_message_detail' message.id %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i> Send Reply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

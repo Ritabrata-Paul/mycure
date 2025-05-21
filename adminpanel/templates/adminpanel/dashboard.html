@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard | MyCure{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4">Admin Dashboard</h1>
+    
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Users Stats -->
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Users</h6>
+                            <h3 class="mb-0">{{ users_count }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-users text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-transparent py-2">
+                    <a href="{% url 'manage_users' %}" class="text-decoration-none small">View all users</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Authorities Stats -->
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Authorities</h6>
+                            <h3 class="mb-0">{{ authorities_count }}</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-hospital text-success"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-transparent py-2">
+                    <a href="{% url 'manage_authorities' %}" class="text-decoration-none small">View all authorities</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Appointments Stats -->
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Appointments</h6>
+                            <h3 class="mb-0">{{ appointments_count }}</h3>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-calendar-check text-info"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-transparent py-2">
+                    <a href="{% url 'all_appointments' %}" class="text-decoration-none small">View all appointments</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Messages Stats -->
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">New Messages</h6>
+                            <h3 class="mb-0">{{ new_messages }}</h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-envelope text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-transparent py-2">
+                    <a href="{% url 'contact_messages' %}" class="text-decoration-none small">View all messages</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Pending Authorities -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Pending Authorities</h5>
+                        <span class="badge bg-warning rounded-pill">{{ pending_authorities }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if pending_authorities > 0 %}
+                    <p class="text-muted">There are {{ pending_authorities }} authorities waiting for verification.</p>
+                    <a href="{% url 'manage_authorities' %}?verification_status=unverified" class="btn btn-outline-primary">Review Pending Authorities</a>
+                    {% else %}
+                    <p class="text-success mb-0">All authorities have been verified!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Appointments -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Pending Appointments</h5>
+                        <span class="badge bg-info rounded-pill">{{ pending_appointments }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if pending_appointments > 0 %}
+                    <p class="text-muted">There are {{ pending_appointments }} appointments waiting for approval.</p>
+                    <a href="{% url 'all_appointments' %}?status=PENDING" class="btn btn-outline-primary">View Pending Appointments</a>
+                    {% else %}
+                    <p class="text-success mb-0">No pending appointments at the moment!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activities Section -->
+    <div class="row">
+        <!-- Recent Users -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Users</h5>
+                        <a href="{% url 'manage_users' %}" class="text-decoration-none small">View all</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Type</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in recent_users %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'user_detail' user.id %}" class="text-decoration-none">
+                                            {{ user.get_full_name|default:user.email }}
+                                        </a>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <span class="badge {% if user.user_type == 'CUSTOMER' %}bg-primary{% elif user.user_type == 'AUTHORITY' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ user.get_user_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">No users found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Appointments -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Appointments</h5>
+                        <a href="{% url 'all_appointments' %}" class="text-decoration-none small">View all</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Authority</th>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in recent_appointments %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'admin_authority_detail' appointment.authority.id %}" class="text-decoration-none">
+                                            {{ appointment.authority.name }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'user_detail' appointment.user.id %}" class="text-decoration-none">
+                                            {{ appointment.user.get_full_name|default:appointment.user.email }}
+                                        </a>
+                                    </td>
+                                    <td>{{ appointment.appointment_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge {% if appointment.status == 'PENDING' %}bg-warning
+                                                           {% elif appointment.status == 'APPROVED' %}bg-success
+                                                           {% elif appointment.status == 'COMPLETED' %}bg-info
+                                                           {% else %}bg-danger{% endif %}">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">No appointments found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Contact Messages -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">New Contact Messages</h5>
+                        <a href="{% url 'contact_messages' %}" class="text-decoration-none small">View all</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>From</th>
+                                    <th>Subject</th>
+                                    <th>Received</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for message in new_contact_messages %}
+                                <tr>
+                                    <td>{{ message.name }} ({{ message.email }})</td>
+                                    <td>{{ message.subject }}</td>
+                                    <td>{{ message.created_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'contact_message_detail' message.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{% url 'reply_contact_message' message.id %}" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-reply"></i> Reply
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">No new messages</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // You can add dashboard-specific JavaScript here
+    $(document).ready(function() {
+        // Any dashboard initialization code
+    });
+</script>
+{% endblock %}

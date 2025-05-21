@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Appointment Details - MyCure{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Appointment Details</h4>
+                    <span class="
+                        badge 
+                        {% if appointment.status == 'PENDING' %}bg-warning{% endif %}
+                        {% if appointment.status == 'APPROVED' %}bg-success{% endif %}
+                        {% if appointment.status == 'REJECTED' %}bg-danger{% endif %}
+                        {% if appointment.status == 'COMPLETED' %}bg-info{% endif %}
+                        {% if appointment.status == 'CANCELLED' %}bg-secondary{% endif %}
+                    ">
+                        {% if appointment.status == 'PENDING' %}
+                            Pending
+                        {% elif appointment.status == 'APPROVED' %}
+                            Approved
+                        {% elif appointment.status == 'REJECTED' %}
+                            Rejected
+                        {% elif appointment.status == 'COMPLETED' %}
+                            Completed
+                        {% elif appointment.status == 'CANCELLED' %}
+                            Cancelled
+                        {% else %}
+                            {{ appointment.status }}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- Authority Info -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <h5>Healthcare Provider</h5>
+                        <div class="d-flex align-items-center mt-3">
+                            {% if appointment.authority.logo %}
+                                <img src="{{ appointment.authority.logo.url }}" alt="{{ appointment.authority.name }}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-hospital text-secondary" style="font-size: 1.5rem;"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-1">{{ appointment.authority.name }}</h6>
+                                <p class="text-muted small mb-0">{{ appointment.authority.address }}, {{ appointment.authority.city }}</p>
+                                {% if appointment.authority.phone %}
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-phone me-1"></i> {{ appointment.authority.phone }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service and Doctor Info -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h5>Service</h5>
+                                <div class="card mt-2 bg-light">
+                                    <div class="card-body">
+                                        <h6 class="mb-1">{{ appointment.service.name }}</h6>
+                                        <p class="small mb-2">{{ appointment.service.description|truncatechars:100 }}</p>
+                                        <p class="mb-0 text-primary fw-bold">₹{{ appointment.service.price }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <h5>Doctor</h5>
+                                {% if appointment.doctor %}
+                                    <div class="card mt-2 bg-light">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center">
+                                                {% if appointment.doctor.photo %}
+                                                    <img src="{{ appointment.doctor.photo.url }}" alt="Dr. {{ appointment.doctor.name }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                                {% else %}
+                                                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-user-md text-secondary"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="mb-0">Dr. {{ appointment.doctor.name }}</h6>
+                                                    <small class="text-muted">{{ appointment.doctor.specialization }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="card mt-2 bg-light">
+                                        <div class="card-body">
+                                            <p class="mb-0 text-muted">No specific doctor assigned</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Appointment Details -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <h5>Appointment Details</h5>
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1 text-muted small">Date</p>
+                                <p class="mb-0"><i class="fas fa-calendar me-2"></i> {{ appointment.appointment_date|date:"l, F d, Y" }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1 text-muted small">Time</p>
+                                <p class="mb-0"><i class="fas fa-clock me-2"></i> {{ appointment.appointment_time }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1 text-muted small">Booking ID</p>
+                                <p class="mb-0">#{{ appointment.id }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1 text-muted small">Booked On</p>
+                                <p class="mb-0">{{ appointment.created_at|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Notes -->
+                    {% if appointment.notes %}
+                    <div class="mb-4 pb-3 border-bottom">
+                        <h5>Additional Notes</h5>
+                        <p class="mt-2 mb-0">{{ appointment.notes }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Rejection Reason -->
+                    {% if appointment.status == 'REJECTED' and appointment.rejection_reason %}
+                    <div class="mb-4 pb-3 border-bottom">
+                        <h5>Rejection Reason</h5>
+                        <div class="alert alert-danger mt-2">
+                            {{ appointment.rejection_reason }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'my_appointments' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to My Appointments
+                        </a>
+                        
+                        {% if appointment.can_cancel %}
+                        <a href="{% url 'cancel_appointment' appointment.id %}" class="btn btn-danger">
+                            <i class="fas fa-times-circle me-2"></i>Cancel Appointment
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

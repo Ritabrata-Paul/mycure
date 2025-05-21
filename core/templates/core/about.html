@@ -1,0 +1,749 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}About MyCure - Your Healthcare Appointment System{% endblock %}
+{% block extra_css %}
+<style>
+  :root {
+  --primary: #3e64ff;
+  --secondary: #1e3a8a;
+  --success: #10b981;
+  --info: #0ea5e9;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --light: #f3f4f6;
+  --dark: #1f2937;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Header Section */
+.page-title {
+  position: relative;
+  padding: 120px 0;
+  background-image: url('https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.page-title .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.9));
+}
+
+.page-title .block {
+  position: relative;
+}
+
+.page-title h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* About Section */
+.about-page {
+  padding: 100px 0;
+}
+
+.title-color {
+  color: var(--secondary);
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.title-color:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 60px;
+  height: 3px;
+  background-color: var(--primary);
+}
+
+.divider {
+  width: 60px;
+  height: 3px;
+  background-color: var(--primary);
+}
+
+/* Features Section */
+.awards {
+  background-color: #f8f9fa;
+  padding: 100px 0;
+}
+
+.award-img {
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  height: 100%;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.award-img:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.award-img i {
+  font-size: 3rem;
+  color: var(--primary);
+}
+
+/* Team Section */
+.team {
+  padding: 100px 0;
+}
+
+.team-block {
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.team-block:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.team-block img {
+  border-radius: 10px 10px 0 0;
+  height: 280px;
+  object-fit: cover;
+}
+
+.team-block .content {
+  padding: 20px;
+  text-align: center;
+  background-color: #fff;
+}
+
+.team-block h4 {
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.team-block p {
+  color: var(--primary);
+  margin-bottom: 0;
+}
+
+/* Testimonial Section */
+.testimonial {
+  position: relative;
+  padding: 100px 0;
+  background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://images.unsplash.com/photo-1666214280557-f1b5022eb634?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.testimonial-block {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.testimonial-block:hover {
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.testimonial-block .client-info h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--secondary);
+}
+
+.testimonial-block .client-info span {
+  font-size: 0.9rem;
+  color: var(--primary);
+}
+
+.testimonial-block i {
+  position: absolute;
+  right: 30px;
+  bottom: 20px;
+  font-size: 2rem;
+  color: rgba(62, 100, 255, 0.1);
+}
+
+/* Partners Section */
+.clients {
+  padding: 100px 0;
+  background-color: #f8f9fa;
+}
+
+.client-thumb {
+  text-align: center;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.client-thumb:hover {
+  transform: scale(1.05);
+}
+
+.client-thumb img {
+  max-height: 100px;
+  filter: grayscale(1);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.client-thumb:hover img {
+  filter: grayscale(0);
+  opacity: 1;
+}
+
+/* Mission/Vision Section */
+.mission-section {
+  padding: 100px 0;
+}
+
+.mission-card {
+  background: white;
+  border-radius: 10px;
+  padding: 40px 30px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.mission-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.mission-card i {
+  font-size: 3rem;
+  color: var(--primary);
+  margin-bottom: 20px;
+}
+
+/* Stats Section */
+.stats-about {
+  background: linear-gradient(rgba(30, 58, 138, 0.95), rgba(30, 58, 138, 0.9)), url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center;
+  background-size: cover;
+  color: white;
+  padding: 80px 0;
+}
+
+.stats-card {
+  text-align: center;
+  padding: 30px 15px;
+}
+
+.stats-card .stats-icon {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: var(--primary);
+}
+
+.stats-card .stats-number {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.stats-card .stats-text {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Timeline */
+.timeline-section {
+  position: relative;
+  padding: 100px 0;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 50px;
+  padding-left: 70px;
+}
+
+.timeline-item:before {
+  content: '';
+  position: absolute;
+  left: 35px;
+  top: 0;
+  height: 100%;
+  width: 1px;
+  background-color: #ccc;
+}
+
+.timeline-item:last-child:before {
+  height: 0;
+}
+
+.timeline-item .timeline-dot {
+  position: absolute;
+  left: 30px;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  transform: translateX(-50%);
+}
+
+.timeline-item .timeline-date {
+  display: inline-block;
+  padding: 5px 15px;
+  background-color: var(--primary);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+.timeline-item h4 {
+  font-weight: 700;
+  color: var(--secondary);
+  margin-bottom: 10px;
+}
+
+/* Animation class */
+.animated {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* CTA Section */
+.cta-section {
+  background: linear-gradient(rgba(30, 58, 138, 0.95), rgba(30, 58, 138, 0.9)), url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center;
+  background-size: cover;
+  padding: 80px 0;
+  color: white;
+}
+</style>
+{% endblock %}
+{% block content %}
+<!-- About Header Section -->
+<section class="page-title">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="block text-center">
+          <span class="text-white">About Us</span>
+          <h1 class="text-capitalize mb-4">Our Company</h1>
+          <p class="text-white opacity-75 mb-0">Learn about our mission, vision, and the team behind MyCure</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- About Section -->
+<section class="section about-page">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <img src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="About MyCure" class="img-fluid rounded-4 shadow">
+      </div>
+      <div class="col-lg-6">
+        <div class="ps-lg-5">
+          <div class="mb-5">
+            <h2 class="title-color">Personal care for your healthy living</h2>
+          </div>
+          <p class="mb-4">MyCure is a pioneering healthcare platform designed to bridge the gap between patients and healthcare providers. We believe that everyone deserves access to quality healthcare services without the hassle of traditional appointment systems.</p>
+          <p>Our mission is to transform the healthcare experience by providing an easy-to-use platform that connects patients with hospitals, clinics, and diagnostic centers. We're committed to making healthcare more accessible, efficient, and patient-centered.</p>
+          <div class="d-flex mt-5">
+            <div class="me-4">
+              <img src="https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="CEO Signature" class="img-fluid">
+            </div>
+            <div>
+              <h5 class="mb-1">John Matthews</h5>
+              <p class="text-muted mb-0">CEO & Founder</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Mission & Vision Section -->
+<section class="mission-section bg-light">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center">
+        <h2 class="title-color d-inline-block">Our Mission & Vision</h2>
+        <div class="divider mx-auto my-4"></div>
+        <p class="text-muted">What drives us and where we're heading on our journey to transform healthcare</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="mission-card">
+          <i class="fas fa-bullseye"></i>
+          <h3 class="h4 mb-3">Our Mission</h3>
+          <p class="text-muted mb-0">To revolutionize healthcare access by connecting patients with quality healthcare providers through an intuitive digital platform, making the process of finding, booking, and managing healthcare appointments seamless and stress-free.</p>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="mission-card">
+          <i class="fas fa-eye"></i>
+          <h3 class="h4 mb-3">Our Vision</h3>
+          <p class="text-muted mb-0">To be the world's leading healthcare appointment platform, creating a future where quality healthcare is accessible to everyone with just a few clicks, empowering people to take control of their health journey.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Features Section -->
+<section class="section awards">
+  <div class="container">
+    <div class="row align-items-center mb-5">
+      <div class="col-lg-6">
+        <h2 class="title-color">Our Platform Features</h2>
+        <div class="divider mt-4"></div>
+        <p class="mt-4 text-muted">MyCure offers a comprehensive suite of features designed to streamline the healthcare appointment process and improve the patient experience.</p>
+      </div>
+      <div class="col-lg-6">
+        <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Platform Features" class="img-fluid rounded-4 shadow">
+      </div>
+    </div>
+    <div class="row g-4 mt-3">
+      <div class="col-lg-4 col-md-6">
+        <div class="award-img">
+          <i class="fas fa-search"></i>
+          <h4 class="h5 mt-4 mb-3">Smart Search</h4>
+          <p class="text-muted mb-0">Find doctors, hospitals, and services with our intelligent search functionality that filters by specialty, location, insurance, and availability</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="award-img">
+          <i class="fas fa-calendar-alt"></i>
+          <h4 class="h5 mt-4 mb-3">Online Booking</h4>
+          <p class="text-muted mb-0">Book appointments with healthcare providers anytime, anywhere with real-time availability and instant confirmation</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="award-img">
+          <i class="fas fa-user-md"></i>
+          <h4 class="h5 mt-4 mb-3">Provider Profiles</h4>
+          <p class="text-muted mb-0">View detailed profiles with credentials, specialties, patient reviews, and available services before making your choice</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="award-img">
+          <i class="fas fa-bell"></i>
+          <h4 class="h5 mt-4 mb-3">Smart Reminders</h4>
+          <p class="text-muted mb-0">Never miss an appointment with automated notifications via email, SMS, or push notifications based on your preferences</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="award-img">
+          <i class="fas fa-star"></i>
+          <h4 class="h5 mt-4 mb-3">Reviews & Ratings</h4>
+          <p class="text-muted mb-0">Make informed decisions with verified patient reviews and ratings for healthcare providers and facilities</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="award-img">
+          <i class="fas fa-notes-medical"></i>
+          <h4 class="h5 mt-4 mb-3">Health Records</h4>
+          <p class="text-muted mb-0">Securely store and access your medical history, prescriptions, and test results in one centralized location</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Stats Section -->
+<section class="stats-about">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+        <div class="stats-card">
+          <div class="stats-icon">
+            <i class="fas fa-user-md"></i>
+          </div>
+          <h3 class="stats-number">58K+</h3>
+          <p class="stats-text mb-0">Happy Patients</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+        <div class="stats-card">
+          <div class="stats-icon">
+            <i class="fas fa-hospital"></i>
+          </div>
+          <h3 class="stats-number">120+</h3>
+          <p class="stats-text mb-0">Medical Partners</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+        <div class="stats-card">
+          <div class="stats-icon">
+            <i class="fas fa-stethoscope"></i>
+          </div>
+          <h3 class="stats-number">550+</h3>
+          <p class="stats-text mb-0">Expert Doctors</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+          <div class="stats-icon">
+            <i class="fas fa-globe"></i>
+          </div>
+          <h3 class="stats-number">25+</h3>
+          <p class="stats-text mb-0">Cities Covered</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Team Section -->
+<section class="section team">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center">
+        <h2 class="title-color d-inline-block">Meet Our Leadership</h2>
+        <div class="divider mx-auto my-4"></div>
+        <p class="text-muted">The dedicated individuals behind MyCure who work tirelessly to improve healthcare accessibility for all</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="team-block">
+          <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="John Matthews" class="img-fluid">
+          <div class="content">
+            <h4>John Matthews</h4>
+            <p>CEO & Founder</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="team-block">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Sarah Johnson" class="img-fluid">
+          <div class="content">
+            <h4>Sarah Johnson</h4>
+            <p>Chief Medical Officer</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="team-block">
+          <img src="https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="David Wilson" class="img-fluid">
+          <div class="content">
+            <h4>David Wilson</h4>
+            <p>CTO</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="team-block">
+          <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Emily Parker" class="img-fluid">
+          <div class="content">
+            <h4>Emily Parker</h4>
+            <p>Head of Operations</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Company Timeline -->
+<section class="timeline-section">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center">
+        <h2 class="title-color d-inline-block">Our Journey</h2>
+        <div class="divider mx-auto my-4"></div>
+        <p class="text-muted">How MyCure evolved from an idea to the leading healthcare appointment platform</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2020</div>
+          <h4>The Beginning</h4>
+          <p class="text-muted">MyCure was founded with a vision to revolutionize healthcare appointment booking. The idea was born from our founder's personal experience with the inefficiencies of traditional healthcare scheduling.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2021</div>
+          <h4>Platform Launch</h4>
+          <p class="text-muted">After months of development and testing, we launched our platform with partnerships with 15 healthcare providers across 3 cities, offering seamless appointment booking services.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2022</div>
+          <h4>Expansion & Growth</h4>
+          <p class="text-muted">MyCure expanded to 10 more cities and partnered with over 50 healthcare facilities. We also introduced new features like health records management and telemedicine options.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2023</div>
+          <h4>Technology Advancement</h4>
+          <p class="text-muted">We integrated AI-powered recommendations and enhanced our platform with mobile applications for both iOS and Android, making healthcare even more accessible.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2024</div>
+          <h4>National Recognition</h4>
+          <p class="text-muted">MyCure received national recognition as the leading healthcare appointment platform, serving over 50,000 patients across 25+ cities with more than 500 healthcare providers.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2025</div>
+          <h4>Future Vision</h4>
+          <p class="text-muted">We're now working on international expansion and enhancing our platform with predictive health analytics and personalized healthcare recommendations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Testimonial Section -->
+<section class="section testimonial">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="section-title">
+          <h2 class="title-color">What Our Patients Say</h2>
+          <div class="divider my-4"></div>
+          <p class="text-muted mb-5">Real experiences from patients who have trusted MyCure with their healthcare needs</p>
+        </div>
+        <img src="https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Happy Patients" class="img-fluid rounded-4 shadow d-none d-lg-block">
+      </div>
+      <div class="col-lg-6">
+        <div class="testimonial-block">
+          <div class="client-info mb-3">
+            <h4>Incredible Experience!</h4>
+            <span>Robert Thompson</span>
+          </div>
+          <p>
+            MyCure made finding a specialist so easy. I was able to book an appointment with a cardiologist within minutes and the entire process was seamless. The reminder notifications ensured I never missed my follow-ups. Highly recommended!
+          </p>
+          <i class="fas fa-quote-right"></i>
+        </div>
+        <div class="testimonial-block">
+          <div class="client-info mb-3">
+            <h4>Time-Saving Platform</h4>
+            <span>Jessica Williams</span>
+          </div>
+          <p>
+            As a busy mom, MyCure has been a lifesaver. I can now book appointments for my family without spending hours on the phone. The ability to compare providers and read reviews helped me find the perfect pediatrician for my children.
+          </p>
+          <i class="fas fa-quote-right"></i>
+        </div>
+        <div class="testimonial-block">
+          <div class="client-info mb-3">
+            <h4>Transformed Healthcare Access</h4>
+            <span>Michael Chen</span>
+          </div>
+          <p>
+            Living in a rural area, access to specialists was always a challenge. With MyCure, I can now find and book appointments with top healthcare providers in nearby cities. This platform has truly transformed healthcare accessibility for me and my family.
+          </p>
+          <i class="fas fa-quote-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Partners Section -->
+<section class="section clients">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center">
+        <h2 class="title-color d-inline-block">Our Partners</h2>
+        <div class="divider mx-auto my-4"></div>
+        <p class="text-muted">We collaborate with leading healthcare institutions to provide you with the best care possible</p>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="client-thumb">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDEyChejNkQlY-b1eSrra2PV4vsMyS1jF2mw&s" alt="Memorial Healthcare" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="client-thumb">
+          <img src="https://media.licdn.com/dms/image/v2/C4E0BAQEPLvSa3SPbbQ/company-logo_200_200/company-logo_200_200/0/1643726481828/wellnesscenter_logo?e=2147483647&v=beta&t=ftgSLyDqfhaCVFKZfSCoB6csRq5EPYAUCCq86f4FQOI" alt="Wellness Group" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="client-thumb">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXYhv4qDdabplI7pw27oCp-Cscmq3x854G6w&s" alt="Central Hospital" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="client-thumb">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8Eq80HM2HzdxkAMaShwQHSDvQ6-HX8uvt5g&s" alt="MedFirst Clinic" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="client-thumb">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRnjPoGlRUp-dLnd3yOpxORD6mjqnHO4qcAA&s" alt="HealthPlus Network" class="img-fluid">
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="client-thumb">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2mGFi6W2ls72bRc-qzmZj4OI54kjcgj1pHw&s" alt="Metro Care" class="img-fluid">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section" style="background: linear-gradient(rgba(30, 58, 138, 0.95), rgba(30, 58, 138, 0.9)), url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center; background-size: cover; padding: 80px 0; color: white;">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8 col-md-12">
+        <h2 class="h2 fw-bold mb-4 text-white">Ready to experience better healthcare?</h2>
+        <p class="text-white opacity-75 mb-4 mb-lg-0">Join thousands of satisfied patients who have transformed their healthcare journey with MyCure.</p>
+      </div>
+      <div class="col-lg-4 col-md-12 text-lg-end">
+        <a href="{% url 'search' %}" class="btn btn-light btn-lg">Book Appointment</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Additional scripts if needed -->
+<script>
+  // Any custom JavaScript can go here
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize animations or other features
+    const animateOnScroll = document.querySelectorAll('.award-img, .team-block, .client-thumb');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+        }
+      });
+    }, {
+      threshold: 0.1
+    });
+    animateOnScroll.forEach(item => {
+      observer.observe(item);
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+<footer class="bg-dark text-white py-4 mt-5 w-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h5>MyCure</h5>
+                <p>Your trusted healthcare appointment booking platform. Find and book appointments with verified healthcare providers easily.</p>
+                
+            </div>
+            <div class="col-md-3 mb-4">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="{% url 'home' %}" class="text-white">Home</a></li>
+                    <li><a href="{% url 'search' %}" class="text-white">Find Provider</a></li>
+                    <li><a href="{% url 'contact' %}" class="text-white">Contact Us</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'profile' %}" class="text-white">My Profile</a></li>
+                        <li><a href="{% url 'logout' %}" class="text-white">Logout</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}" class="text-white">Login</a></li>
+                        <li><a href="{% url 'register' %}" class="text-white">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-md-2 mb-4">
+                <h5>Social</h5>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-white"><i class="fab fa-facebook-f fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <h5>Contact Us</h5>
+                <address class="mb-0">
+                    <p><i class="fas fa-map-marker-alt me-2"></i> 123 Healthcare St, Medical City</p>
+                    <p><i class="fas fa-phone me-2"></i> (123) 456-7890</p>
+                    <p><a href="mailto:mycure.360@aalho.com" class="text-white"><i class="fas fa-envelope me-2"></i>mycure.360@aalho.com</a></p>
+                </address>
+            </div>
+        </div>
+        <hr class="my-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <p class="mb-0">&copy; {% now "Y" %} MyCure. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>

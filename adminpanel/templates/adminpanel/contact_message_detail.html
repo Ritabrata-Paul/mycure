@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Message Details | MyCure Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Message Details</h1>
+        <div>
+            <a href="{% url 'contact_messages' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i> Back to Messages
+            </a>
+            <a href="{% url 'reply_contact_message' message.id %}" class="btn btn-primary">
+                <i class="fas fa-reply me-1"></i> Reply
+            </a>
+        </div>
+    </div>
+    
+    <!-- Message Details Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">{{ message.subject }}</h5>
+                    <span class="text-muted small">Received on {{ message.created_at|date:"M d, Y H:i" }}</span>
+                </div>
+                <span class="badge {% if message.status == 'NEW' %}bg-danger
+                               {% elif message.status == 'READ' %}bg-warning
+                               {% elif message.status == 'REPLIED' %}bg-success
+                               {% endif %}">
+                    {{ message.get_status_display }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <p class="text-muted mb-1">From:</p>
+                    <p class="mb-0">{{ message.name }} ({{ message.email }})</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <p class="text-muted mb-1">Phone:</p>
+                    <p class="mb-0">{{ message.phone|default:"Not provided" }}</p>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="message-content mt-3">
+                <p class="text-muted mb-1">Message:</p>
+                <div class="p-3 bg-light rounded">
+                    {{ message.message|linebreaks }}
+                </div>
+            </div>
+            
+            {% if message.reply %}
+            <div class="reply-content mt-4">
+                <p class="text-muted mb-1">Your Reply:</p>
+                <div class="p-3 bg-light rounded border-start border-success border-3">
+                    {{ message.reply|linebreaks }}
+                </div>
+                <div class="mt-2 text-muted small">
+                    <p>Replied by: {{ message.replied_by.get_full_name|default:message.replied_by.email }} on {{ message.replied_at|date:"M d, Y H:i" }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer bg-white">
+            <div class="d-flex justify-content-end">
+                {% if not message.reply %}
+                <a href="{% url 'reply_contact_message' message.id %}" class="btn btn-primary">
+                    <i class="fas fa-reply me-1"></i> Reply
+                </a>
+                {% else %}
+                <a href="{% url 'reply_contact_message' message.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-pen me-1"></i> Edit Reply
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

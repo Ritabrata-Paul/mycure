@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Add New Authority | MyCure Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Add New Authority</h1>
+        <a href="{% url 'manage_authorities' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Authorities
+        </a>
+    </div>
+    
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Authority Information -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4 class="card-title mb-3">Authority Information</h4>
+                    </div>
+                    
+                    <!-- Authority Name -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_name" class="form-label">Authority Name <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="invalid-feedback d-block">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Authority Type -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_authority_type" class="form-label">Authority Type <span class="text-danger">*</span></label>
+                        {{ form.authority_type }}
+                        {% if form.authority_type.errors %}
+                        <div class="invalid-feedback d-block">{{ form.authority_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="col-12 mb-3">
+                        <label for="id_description" class="form-label">Description <span class="text-danger">*</span></label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="invalid-feedback d-block">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">Briefly describe the services and facilities offered.</div>
+                    </div>
+                    
+                    <!-- Logo -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_logo" class="form-label">Logo</label>
+                        {{ form.logo }}
+                        {% if form.logo.errors %}
+                        <div class="invalid-feedback d-block">{{ form.logo.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">Upload a square logo image (recommended size: 200x200px)</div>
+                    </div>
+                    
+                    <!-- Registration Number -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_registration_number" class="form-label">Registration Number</label>
+                        {{ form.registration_number }}
+                        {% if form.registration_number.errors %}
+                        <div class="invalid-feedback d-block">{{ form.registration_number.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Established Date -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_established_date" class="form-label">Established Date</label>
+                        {{ form.established_date }}
+                        {% if form.established_date.errors %}
+                        <div class="invalid-feedback d-block">{{ form.established_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Is Verified -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check mt-4">
+                            {{ form.is_verified }}
+                            <label for="id_is_verified" class="form-check-label">Mark as Verified</label>
+                            <div class="form-text">Check this box to immediately verify this authority.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4 class="card-title mb-3">Contact Information</h4>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Phone -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                        <div class="invalid-feedback d-block">{{ form.phone.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Website -->
+                    <div class="col-md-12 mb-3">
+                        <label for="id_website" class="form-label">Website</label>
+                        {{ form.website }}
+                        {% if form.website.errors %}
+                        <div class="invalid-feedback d-block">{{ form.website.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Address Information -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4 class="card-title mb-3">Address Information</h4>
+                    </div>
+                    
+                    <!-- Address -->
+                    <div class="col-12 mb-3">
+                        <label for="id_address" class="form-label">Address <span class="text-danger">*</span></label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                        <div class="invalid-feedback d-block">{{ form.address.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- City -->
+                    <div class="col-md-4 mb-3">
+                        <label for="id_city" class="form-label">City <span class="text-danger">*</span></label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                        <div class="invalid-feedback d-block">{{ form.city.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- State -->
+                    <div class="col-md-4 mb-3">
+                        <label for="id_state" class="form-label">State <span class="text-danger">*</span></label>
+                        {{ form.state }}
+                        {% if form.state.errors %}
+                        <div class="invalid-feedback d-block">{{ form.state.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Postal Code -->
+                    <div class="col-md-4 mb-3">
+                        <label for="id_postal_code" class="form-label">Postal Code <span class="text-danger">*</span></label>
+                        {{ form.postal_code }}
+                        {% if form.postal_code.errors %}
+                        <div class="invalid-feedback d-block">{{ form.postal_code.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Location Coordinates -->
+                    <div class="col-md-6 mb-3">
+                        <label for="id_latitude" class="form-label">Latitude</label>
+                        {{ form.latitude }}
+                        {% if form.latitude.errors %}
+                        <div class="invalid-feedback d-block">{{ form.latitude.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_longitude" class="form-label">Longitude</label>
+                        {{ form.longitude }}
+                        {% if form.longitude.errors %}
+                        <div class="invalid-feedback d-block">{{ form.longitude.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">Enter geographical coordinates for map display</div>
+                    </div>
+                </div>
+                
+                <!-- User Account Information -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4 class="card-title mb-3">Owner Account Information</h4>
+                        <p class="text-muted">Select an existing user or create a new one to manage this authority.</p>
+                    </div>
+                    
+                    <!-- User Account Selection -->
+                    <div class="col-12 mb-3">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="account_type" id="existing_user" value="existing" checked>
+                            <label class="form-check-label" for="existing_user">Use Existing User</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="account_type" id="new_user" value="new">
+                            <label class="form-check-label" for="new_user">Create New User</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Existing User Selection -->
+                    <div id="existing_user_section" class="col-12 mb-3">
+                        <label for="id_user" class="form-label">Select User <span class="text-danger">*</span></label>
+                        {{ form.user }}
+                        {% if form.user.errors %}
+                            <div class="invalid-feedback d-block">{{ form.user.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">Only users with Authority role are shown. If the user doesn't exist, select "Create New User" above.</div>
+                    </div>
+                    
+                    <!-- New User Information -->
+                    <div id="new_user_section" class="col-12" style="display: none;">
+                        <div class="row">
+                            <!-- First Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                                <input type="text" name="first_name" id="id_first_name" class="form-control">
+                                <div class="invalid-feedback">Please enter the first name.</div>
+                            </div>
+                            
+                            <!-- Last Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                <input type="text" name="last_name" id="id_last_name" class="form-control">
+                                <div class="invalid-feedback">Please enter the last name.</div>
+                            </div>
+                            
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_user_email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                <input type="email" name="user_email" id="id_user_email" class="form-control">
+                                <div class="invalid-feedback">Please enter a valid email address.</div>
+                            </div>
+                            
+                            <!-- Password -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password" class="form-label">Password <span class="text-danger">*</span></label>
+                                <input type="password" name="password" id="id_password" class="form-control">
+                                <div class="form-text">Password must be at least 8 characters long.</div>
+                                <div class="invalid-feedback">Please enter a valid password.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{% url 'manage_authorities' %}" class="btn btn-light me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Create Authority
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Toggle between existing and new user sections
+        $('input[name="account_type"]').change(function() {
+            if ($(this).val() === 'existing') {
+                $('#existing_user_section').show();
+                $('#new_user_section').hide();
+                // Make existing user field required
+                $('#id_user').prop('required', true);
+                // Make new user fields not required
+                $('#id_first_name, #id_last_name, #id_user_email, #id_password').prop('required', false);
+            } else {
+                $('#existing_user_section').hide();
+                $('#new_user_section').show();
+                // Make new user fields required
+                $('#id_first_name, #id_last_name, #id_user_email, #id_password').prop('required', true);
+                // Make existing user field not required
+                $('#id_user').prop('required', false);
+            }
+        });
+        
+        // Add select2 for better user selection (if available)
+        if ($.fn.select2) {
+            $('#id_user').select2({
+                placeholder: "Select a user",
+                allowClear: true,
+                width: '100%'
+            });
+        }
+        
+        // Form validation
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    let isValid = true;
+                    
+                    // Check if user is selected when using existing user option
+                    if ($('#existing_user').is(':checked') && !$('#id_user').val()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        isValid = false;
+                        // Add custom validation message
+                        $('#id_user').addClass('is-invalid');
+                        if (!$('#id_user').next('.invalid-feedback').length) {
+                            $('#id_user').after('<div class="invalid-feedback d-block">Please select a user.</div>');
+                        }
+                    }
+                    
+                    // Check if required fields are filled for new user option
+                    if ($('#new_user').is(':checked')) {
+                        const requiredFields = ['#id_first_name', '#id_last_name', '#id_user_email', '#id_password'];
+                        requiredFields.forEach(field => {
+                            if (!$(field).val()) {
+                                $(field).addClass('is-invalid');
+                                isValid = false;
+                            } else {
+                                $(field).removeClass('is-invalid');
+                            }
+                        });
+                        
+                        // Check password length
+                        if ($('#id_password').val() && $('#id_password').val().length < 8) {
+                            $('#id_password').addClass('is-invalid');
+                            $('#id_password').next('.invalid-feedback').text('Password must be at least 8 characters long.');
+                            isValid = false;
+                        }
+                    }
+                    
+                    if (!form.checkValidity() || !isValid) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    });
+</script>
+{% endblock %}

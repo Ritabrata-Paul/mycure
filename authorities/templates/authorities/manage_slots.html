@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Time Slots - {{ authority.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Manage Time Slots</h2>
+            <p class="text-muted">Create and manage available time slots for your services</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'add_slot' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Add New Slot
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if slots %}
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <div class="row">
+                    <div class="col-md-3 fw-bold">Service</div>
+                    <div class="col-md-2 fw-bold">Day</div>
+                    <div class="col-md-2 fw-bold">Time</div>
+                    <div class="col-md-2 fw-bold">Doctor</div>
+                    <div class="col-md-1 fw-bold">Capacity</div>
+                    <div class="col-md-2 fw-bold">Actions</div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for slot in slots %}
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">{{ slot.service.name }}</div>
+                                <div class="col-md-2">{{ slot.get_weekday_display }}</div>
+                                <div class="col-md-2">{{ slot.start_time|time:"g:i A" }} - {{ slot.end_time|time:"g:i A" }}</div>
+                                <div class="col-md-2">
+                                    {% if slot.doctor %}
+                                        {{ slot.doctor.name }}
+                                    {% else %}
+                                        <span class="text-muted">Not assigned</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-1">{{ slot.capacity }}</div>
+                                <div class="col-md-2">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'edit_slot' slot.id %}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'delete_slot' slot.id %}" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                    <div class="form-check form-switch d-inline-block ms-2">
+                                        <input class="form-check-input" type="checkbox" id="slot-active-{{ slot.id }}" 
+                                            {% if slot.is_active %}checked{% endif %} disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>You haven't added any time slots yet. 
+            <a href="{% url 'add_slot' %}" class="alert-link">Click here</a> to add your first time slot.
+        </div>
+    {% endif %}
+
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Time Slots Guide</h5>
+        </div>
+        <div class="card-body">
+            <p>Time slots define when your services are available for booking. Keep these points in mind:</p>
+            <ul>
+                <li>Create separate time slots for different services</li>
+                <li>Assign specific doctors to slots where applicable</li>
+                <li>Set the capacity based on how many appointments you can handle simultaneously</li>
+                <li>You can add multiple slots for the same day with different time ranges</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // You can add JavaScript for enhanced functionality here
+    // For example, to handle active/inactive toggle with AJAX
+</script>
+{% endblock %}

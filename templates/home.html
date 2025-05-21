@@ -1,0 +1,875 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}MyCure - Your Healthcare Appointment System{% endblock %}
+{% block content %}
+<!-- Hero Section with Modern Gradient Background -->
+<section class="hero-section position-relative">
+    <div class="bg-gradient-primary position-absolute top-0 start-0 w-100 h-100"></div>
+    <div class="container position-relative py-5">
+        <div class="row align-items-center py-5">
+            <div class="col-lg-6 text-white">
+                <h1 class="display-4 fw-bold mb-3">Your Health, Our Priority</h1>
+                <p class="lead mb-4">Find and book appointments with top healthcare providers in your area with just a few clicks.</p>
+                <div class="d-grid gap-2 d-md-flex mt-4">
+                    <a href="{% url 'search' %}" class="btn btn-light btn-lg px-4 me-md-2">Find a Provider</a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg px-4">Sign Up Today</a>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-5 mt-lg-0">
+                <div class="hero-image-container">
+                    <img src="{% static 'images/hero.png' %}" alt="Healthcare professionals" class="img-fluid rounded-lg shadow" onerror="this.src='https://via.placeholder.com/600x400?text=MyCure'">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Search Bar Section -->
+<section class="search-section py-4 bg-white shadow">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <form action="{% url 'search' %}" method="get" class="row g-0">
+                            <div class="col-md-5 p-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-0">
+                                        <i class="fas fa-search text-primary"></i>
+                                    </span>
+                                    <input type="text" name="q" class="form-control border-0" placeholder="Search doctors, services...">
+                                </div>
+                            </div>
+                            <div class="col-md-4 p-3 border-start border-end">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-0">
+                                        <i class="fas fa-map-marker-alt text-primary"></i>
+                                    </span>
+                                    <input type="text" name="location" class="form-control border-0" placeholder="Your location">
+                                </div>
+                            </div>
+                            <div class="col-md-3 p-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Find Care Now
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Features Section -->
+<section class="features-section py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-6 mx-auto">
+                <h2 class="section-title">Why Choose MyCure?</h2>
+                <p class="text-muted">We make healthcare accessible, convenient, and efficient</p>
+            </div>
+        </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-4 mx-auto">
+                        <i class="fas fa-calendar-check fa-2x"></i>
+                    </div>
+                    <h3 class="card-title h4">Easy Booking</h3>
+                    <p class="card-text text-muted">Book appointments with healthcare providers in just a few clicks, anytime, anywhere.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-4 mx-auto">
+                        <i class="fas fa-user-md fa-2x"></i>
+                    </div>
+                    <h3 class="card-title h4">Verified Providers</h3>
+                    <p class="card-text text-muted">All healthcare providers on our platform are thoroughly verified for your safety.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-4 mx-auto">
+                        <i class="fas fa-bell fa-2x"></i>
+                    </div>
+                    <h3 class="card-title h4">Smart Reminders</h3>
+                    <p class="card-text text-muted">Get timely reminders about your upcoming appointments so you never miss one.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<!-- Hospitals Section -->
+<section class="hospitals-section py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="section-header">
+                    <h6 class="text-primary text-uppercase fw-bold">Top Hospitals</h6>
+                    <h2 class="section-title">Leading Medical Centers</h2>
+                    <p class="text-muted">Comprehensive care from our network of trusted hospitals</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+                <a href="{% url 'search' %}?type=authority&authority_type=HOSPITAL" class="btn btn-outline-primary">
+                    View All Hospitals <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    <div class="row g-4">
+        {% for hospital in hospitals %}
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm hover-card h-100">
+                <div class="position-relative">
+                    {% if hospital.logo %}
+                    <img src="{{ hospital.logo.url }}" class="card-img-top hospital-img" alt="{{ hospital.name }}">
+                    {% else %}
+                    <div class="bg-primary bg-opacity-10 text-center py-4 hospital-img">
+                        <i class="fas fa-hospital fa-4x text-primary"></i>
+                    </div>
+                    {% endif %}
+                    <div class="badge bg-primary position-absolute top-0 end-0 m-3">Hospital</div>
+                </div>
+                <div class="card-body p-4">
+                    <h3 class="card-title h5 mb-3">{{ hospital.name }}</h3>
+                    <div class="mb-3">
+                        <p class="d-flex align-items-center mb-2">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                            <span class="text-muted small">{{ hospital.city }}, {{ hospital.state }}</span>
+                        </p>
+                        {% if hospital.phone %}
+                        <p class="d-flex align-items-center mb-2">
+                            <i class="fas fa-phone text-primary me-2"></i>
+                            <span class="text-muted small">{{ hospital.phone }}</span>
+                        </p>
+                        {% endif %}
+                        {% if hospital.email %}
+                        <p class="d-flex align-items-center mb-0">
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            <span class="text-muted small">{{ hospital.email }}</span>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{% url 'search' %}?authority={{ hospital.id }}" class="btn btn-sm btn-outline-primary">View Services</a>
+                        <a href="{% url 'search' %}?authority={{ hospital.id }}" class="btn btn-sm btn-primary">Book Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Hospitals will be listed here soon. Please check back later.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</section>
+<!-- Clinics Section -->
+<section class="clinics-section py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="section-header">
+                    <h6 class="text-primary text-uppercase fw-bold">Specialist Clinics</h6>
+                    <h2 class="section-title">Expert Specialized Care</h2>
+                    <p class="text-muted">Focused healthcare services from our partner clinics</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+                <a href="{% url 'search' %}?type=authority&authority_type=CLINIC" class="btn btn-outline-primary">
+                    View All Clinics <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    <div class="row g-4">
+        {% for clinic in clinics %}
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm hover-card h-100">
+                <div class="position-relative">
+                    {% if clinic.logo %}
+                    <img src="{{ clinic.logo.url }}" class="card-img-top clinic-img" alt="{{ clinic.name }}">
+                    {% else %}
+                    <div class="bg-success bg-opacity-10 text-center py-4 clinic-img">
+                        <i class="fas fa-clinic-medical fa-4x text-success"></i>
+                    </div>
+                    {% endif %}
+                    <div class="badge bg-success position-absolute top-0 end-0 m-3">Clinic</div>
+                </div>
+                <div class="card-body p-4">
+                    <h3 class="card-title h5 mb-3">{{ clinic.name }}</h3>
+                    <div class="mb-3">
+                        <p class="d-flex align-items-center mb-2">
+                            <i class="fas fa-map-marker-alt text-success me-2"></i>
+                            <span class="text-muted small">{{ clinic.city }}, {{ clinic.state }}</span>
+                        </p>
+                        {% if clinic.phone %}
+                        <p class="d-flex align-items-center mb-2">
+                            <i class="fas fa-phone text-success me-2"></i>
+                            <span class="text-muted small">{{ clinic.phone }}</span>
+                        </p>
+                        {% endif %}
+                        {% if clinic.email %}
+                        <p class="d-flex align-items-center mb-0">
+                            <i class="fas fa-envelope text-success me-2"></i>
+                            <span class="text-muted small">{{ clinic.email }}</span>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{% url 'search' %}?authority={{ clinic.id }}" class="btn btn-sm btn-outline-success">View Services</a> 
+                        <a href="{% url 'search' %}?authority={{ clinic.id }}" class="btn btn-sm btn-success">Book Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Clinics will be listed here soon. Please check back later.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</section>
+<!-- Diagnostic Centers Section -->
+<section class="diagnostic-section py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="section-header">
+                    <h6 class="text-primary text-uppercase fw-bold">Diagnostic Centers</h6>
+                    <h2 class="section-title">Advanced Diagnostic Services</h2>
+                    <p class="text-muted">State-of-the-art testing and diagnostic facilities</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+                <a href="{% url 'search' %}?type=authority&authority_type=DIAGNOSTIC" class="btn btn-outline-primary">
+                    View All Centers <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    <div class="row g-4">
+        {% for center in diagnostic_centers %}
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm hover-card h-100">
+                <div class="position-relative">
+                    {% if center.logo %}
+                    <img src="{{ center.logo.url }}" class="card-img-top center-img" alt="{{ center.name }}">
+                    {% else %}
+                    <div class="bg-info bg-opacity-10 text-center py-4 center-img">
+                        <i class="fas fa-microscope fa-4x text-info"></i>
+                    </div>
+                    {% endif %}
+                    <div class="badge bg-info position-absolute top-0 end-0 m-3">Diagnostic</div>
+                </div>
+                <div class="card-body p-4">
+                    <h3 class="card-title h5 mb-3">{{ center.name }}</h3>
+                    <div class="mb-3">
+                        <p class="d-flex align-items-center mb-2">
+                            <i class="fas fa-map-marker-alt text-info me-2"></i>
+                            <span class="text-muted small">{{ center.city }}, {{ center.state }}</span>
+                        </p>
+                        {% if center.phone %}
+                        <p class="d-flex align-items-center mb-2">
+                            <i class="fas fa-phone text-info me-2"></i>
+                            <span class="text-muted small">{{ center.phone }}</span>
+                        </p>
+                        {% endif %}
+                        {% if center.email %}
+                        <p class="d-flex align-items-center mb-0">
+                            <i class="fas fa-envelope text-info me-2"></i>
+                            <span class="text-muted small">{{ center.email }}</span>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{% url 'search' %}?authority={{ center.id }}" class="btn btn-sm btn-outline-info">View Services</a>
+                        <a href="{% url 'search' %}?authority={{ center.id }}" class="btn btn-sm btn-info">Book Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Diagnostic centers will be listed here soon. Please check back later.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</section>
+<!-- Featured Doctors Section -->
+<section class="doctors-section py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="section-header">
+                    <h6 class="text-primary text-uppercase fw-bold">Experienced Professionals</h6>
+                    <h2 class="section-title">Meet Our Top Doctors</h2>
+                    <p class="text-muted">Qualified specialists ready to provide excellent care</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+                <a href="{% url 'search' %}?type=doctor" class="btn btn-outline-primary">
+                    View All Doctors <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    <div class="row g-4">
+        {% for doctor in doctors %}
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm hover-card h-100">
+                <div class="text-center pt-4">
+                    {% if doctor.photo %}
+                    <img src="{{ doctor.photo.url }}" class="rounded-circle doctor-img mb-3" alt="Dr. {{ doctor.name }}">
+                    {% else %}
+                    <div class="rounded-circle bg-primary bg-opacity-10 doctor-img mx-auto mb-3">
+                        <i class="fas fa-user-md fa-3x text-primary"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body text-center p-4 pt-0">
+                    <h3 class="card-title h5 mb-1">Dr. {{ doctor.name }}</h3>
+                    <p class="text-primary fw-medium mb-2">{{ doctor.specialization }}</p>
+                    <p class="small text-muted mb-3">{{ doctor.qualification }}</p>
+                    <div class="d-flex align-items-center justify-content-center mb-3">
+                        <div class="bg-light px-2 py-1 rounded-pill small">
+                            <i class="fas fa-hospital-alt text-primary me-1"></i>
+                            {{ doctor.authority.name|truncatechars:20 }}
+                        </div>
+                    </div>
+                    <a href="{% url 'search' %}?doctor={{ doctor.id }}" class="btn btn-sm btn-primary w-100">Book Appointment</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Our doctors will be listed here soon. Please check back later.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</section>
+<!-- Stats Section -->
+<section class="stats-section py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 text-center">
+                <div class="stat-item">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-hospital fa-3x"></i>
+                    </div>
+                    <h3 class="counter">{{ authorities_count|default:"250" }}+</h3>
+                    <p class="mb-0">Healthcare Providers</p>
+                </div>
+            </div>
+        <div class="col-md-3 text-center">
+            <div class="stat-item">
+                <div class="stat-icon mb-3">
+                    <i class="fas fa-user-md fa-3x"></i>
+                </div>
+                <h3 class="counter">{{ doctors_count|default:"1500" }}+</h3>
+                <p class="mb-0">Expert Doctors</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="stat-item">
+                <div class="stat-icon mb-3">
+                    <i class="fas fa-users fa-3x"></i>
+                </div>
+                <h3 class="counter">{{ users_count|default:"10000" }}+</h3>
+                <p class="mb-0">Satisfied Patients</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="stat-item">
+                <div class="stat-icon mb-3">
+                    <i class="fas fa-calendar-check fa-3x"></i>
+                </div>
+                <h3 class="counter">{{ appointments_count|default:"25000" }}+</h3>
+                <p class="mb-0">Appointments Booked</p>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<!-- How It Works -->
+<section class="how-it-works-section py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-6 mx-auto">
+                <h6 class="text-primary text-uppercase fw-bold">Process</h6>
+                <h2 class="section-title">How It Works</h2>
+                <p class="text-muted">Simple steps to access quality healthcare</p>
+            </div>
+        </div>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 text-center hover-card">
+                <div class="card-body p-4">
+                    <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4">
+                        <h3 class="mb-0">1</h3>
+                    </div>
+                    <h4 class="h5">Create Account</h4>
+                    <p class="text-muted mb-0">Sign up and create your personal health profile</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 text-center hover-card">
+                <div class="card-body p-4">
+                    <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4">
+                        <h3 class="mb-0">2</h3>
+                    </div>
+                    <h4 class="h5">Find Provider</h4>
+                    <p class="text-muted mb-0">Search and filter healthcare providers by specialty or location</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 text-center hover-card">
+                <div class="card-body p-4">
+                    <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4">
+                        <h3 class="mb-0">3</h3>
+                    </div>
+                    <h4 class="h5">Book Appointment</h4>
+                    <p class="text-muted mb-0">Select a convenient time slot and confirm your appointment</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 text-center hover-card">
+                <div class="card-body p-4">
+                    <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4">
+                        <h3 class="mb-0">4</h3>
+                    </div>
+                    <h4 class="h5">Get Care</h4>
+                    <p class="text-muted mb-0">Visit the healthcare provider and receive quality care</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<!-- Testimonials -->
+<section class="testimonials-section py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-6 mx-auto">
+                <h6 class="text-primary text-uppercase fw-bold">Testimonials</h6>
+                <h2 class="section-title">What Our Users Say</h2>
+                <p class="text-muted">Real experiences from our satisfied users</p>
+            </div>
+        </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 testimonial-card">
+                <div class="card-body p-4">
+                    <div class="text-warning mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="card-text mb-4">"MyCure made it so easy to find and book an appointment with a specialist. The interface is intuitive and user-friendly. Saved me hours of phone calls!"</p>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <img src="{% static 'images/testimonials/user1.jpg' %}" alt="Sarah Johnson" class="rounded-circle testimonial-img" onerror="this.src='{% static 'images/user.png' %}'">
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">Sarah Johnson</h6>
+                            <small class="text-muted">Patient</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 testimonial-card">
+                <div class="card-body p-4">
+                    <div class="text-warning mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="card-text mb-4">"As a busy professional, I appreciate how MyCure lets me book appointments outside of regular hours. The reminder system is excellent too. Great service!"</p>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <img src="{% static 'images/testimonials/user2.jpg' %}" alt="Michael Thompson" class="rounded-circle testimonial-img" onerror="this.src='{% static 'images/user.png' %}'">
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">Michael Thompson</h6>
+                            <small class="text-muted">Patient</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 testimonial-card">
+                <div class="card-body p-4">
+                    <div class="text-warning mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="card-text mb-4">"I haven't missed an appointment since I started using MyCure. The reminder system is fantastic, and finding the right specialist was incredibly easy. Highly recommended!"</p>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <img src="{% static 'images/testimonials/user3.jpg' %}" alt="Emily Rodriguez" class="rounded-circle testimonial-img" onerror="this.src='{% static 'images/user.png' %}'">
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">Emily Rodriguez</h6>
+                            <small class="text-muted">Patient</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Call to Action (Completed Section) -->
+<section class="cta-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5 text-center">
+                        <h2 class="mb-3">Ready to take control of your healthcare journey?</h2>
+                        <p class="lead text-muted mb-4">Join thousands of satisfied users who have simplified their healthcare experience with MyCure.</p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4">Sign Up Now</a>
+                            <a href="{% url 'search' %}" class="btn btn-outline-secondary btn-lg px-4">Explore Services</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% comment %} <!-- Newsletter Section -->
+<section class="newsletter-section py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h3 class="mb-3">Stay Updated with Healthcare Tips</h3>
+                <p class="text-muted mb-4 mb-lg-0">Subscribe to our newsletter for health tips, service updates, and exclusive offers.</p>
+            </div>
+            <div class="col-lg-6">
+                <form action="{% url 'subscribe' %}" method="post" class="newsletter-form">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="email" name="email" class="form-control form-control-lg" placeholder="Your email address" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </div>
+                    <div class="form-text text-muted mt-2">We respect your privacy. Unsubscribe at any time.</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section> {% endcomment %}
+
+<!-- Mobile App CTA -->
+<section class="app-cta-section py-5">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="app-content">
+                    <h6 class="text-primary text-uppercase fw-bold">Mobile App</h6>
+                    <h2 class="mb-4">Take Healthcare On The Go</h2>
+                    <p class="lead mb-4">Download our mobile app for even easier access to healthcare services, appointment booking, and health tracking.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#" class="btn btn-dark btn-lg d-inline-flex align-items-center">
+                            <i class="fab fa-apple me-2 fa-lg"></i>
+                            <div class="text-start">
+                                <div class="small">Download on the</div>
+                                <div class="fw-bold">App Store</div>
+                            </div>
+                        </a>
+                        <a href="#" class="btn btn-dark btn-lg d-inline-flex align-items-center">
+                            <i class="fab fa-google-play me-2 fa-lg"></i>
+                            <div class="text-start">
+                                <div class="small">Get it on</div>
+                                <div class="fw-bold">Google Play</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="app-image text-center">
+                    <img src="{% static 'images/app-mockup.png' %}" alt="MyCure Mobile App" class="img-fluid" onerror="this.src='https://via.placeholder.com/500x600?text=Mobile+App'">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-6 mx-auto">
+                <h6 class="text-primary text-uppercase fw-bold">FAQs</h6>
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="text-muted">Find answers to common questions about our services</p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="accordion" id="accordionFAQ">
+                    <!-- FAQ Item 1 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                How do I book an appointment?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionFAQ">
+                            <div class="accordion-body">
+                                Booking an appointment is simple. Create an account, search for your preferred healthcare provider, select an available time slot, and confirm your booking. You'll receive an email confirmation and reminders as your appointment approaches.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 2 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Can I cancel or reschedule my appointment?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionFAQ">
+                            <div class="accordion-body">
+                                Yes, you can cancel or reschedule your appointment through your account dashboard. Please note that some providers have cancellation policies that may apply fees if done within 24 hours of the scheduled appointment.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 3 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Is my personal health information secure?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionFAQ">
+                            <div class="accordion-body">
+                                Absolutely. We take your privacy seriously and comply with all relevant healthcare privacy regulations. Your personal health information is encrypted and securely stored according to industry best practices.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 4 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                How do I find a specialist doctor?
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionFAQ">
+                            <div class="accordion-body">
+                                Use our search function to filter doctors by specialization, location, or health authority. You can also view their profiles, qualifications, and patient reviews to help you make an informed decision.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 5 -->
+                    <div class="accordion-item border-0 shadow-sm">
+                        <h2 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                Do I need to pay anything to use MyCure?
+                            </button>
+                        </h2>
+                        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionFAQ">
+                            <div class="accordion-body">
+                                MyCure is completely free to use for patients. We help you find and book appointments with healthcare providers, but any fees for medical services are determined by the providers themselves and would be paid directly to them.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-5">
+            
+        </div>
+    </div>
+</section>
+
+<!-- Partners Section -->
+<section class="partners-section py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-6 mx-auto">
+                <h6 class="text-primary text-uppercase fw-bold">Our Partners</h6>
+                <h2 class="section-title">Trusted By The Best</h2>
+                <p class="text-muted">We collaborate with leading healthcare organizations</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-6 col-md-3 col-lg-2">
+                <div class="card border-0 h-100 text-center">
+                    <div class="card-body p-3">
+                        <img src="{% static 'images/partners/partner1.png' %}" alt="Partner" class="img-fluid grayscale partner-logo" onerror="this.src='https://via.placeholder.com/150x80?text=Partner'">
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <div class="card border-0 h-100 text-center">
+                    <div class="card-body p-3">
+                        <img src="{% static 'images/partners/partner2.png' %}" alt="Partner" class="img-fluid grayscale partner-logo" onerror="this.src='https://via.placeholder.com/150x80?text=Partner'">
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <div class="card border-0 h-100 text-center">
+                    <div class="card-body p-3">
+                        <img src="{% static 'images/partners/partner3.png' %}" alt="Partner" class="img-fluid grayscale partner-logo" onerror="this.src='https://via.placeholder.com/150x80?text=Partner'">
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <div class="card border-0 h-100 text-center">
+                    <div class="card-body p-3">
+                        <img src="{% static 'images/partners/partner4.png' %}" alt="Partner" class="img-fluid grayscale partner-logo" onerror="this.src='https://via.placeholder.com/150x80?text=Partner'">
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <div class="card border-0 h-100 text-center">
+                    <div class="card-body p-3">
+                        <img src="{% static 'images/partners/partner5.png' %}" alt="Partner" class="img-fluid grayscale partner-logo" onerror="this.src='https://via.placeholder.com/150x80?text=Partner'">
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <div class="card border-0 h-100 text-center">
+                    <div class="card-body p-3">
+                        <img src="{% static 'images/partners/partner6.png' %}" alt="Partner" class="img-fluid grayscale partner-logo" onerror="this.src='https://via.placeholder.com/150x80?text=Partner'">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Blog Highlights Section -->
+<section class="blog-section py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="section-header">
+                    <h6 class="text-primary text-uppercase fw-bold">Health Blog</h6>
+                    <h2 class="section-title">Latest Health Tips & News</h2>
+                    <p class="text-muted">Stay informed with our health articles and news</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+                
+            </div>
+        </div>
+        <div class="row g-4">
+            {% for post in blog_posts %}
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 blog-card">
+                    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}" onerror="this.src='https://via.placeholder.com/400x200?text=Blog+Post'">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="post-category badge bg-primary bg-opacity-10 text-primary">{{ post.category }}</div>
+                            <div class="post-date text-muted small">{{ post.created_at|date:"M d, Y" }}</div>
+                        </div>
+                        <h3 class="card-title h5 mb-3">{{ post.title }}</h3>
+                        <p class="card-text text-muted">{{ post.excerpt|truncatechars:120 }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                        <a href="{% url 'blog_post' post.slug %}" class="btn btn-link text-primary p-0">Read More <i class="fas fa-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Blog posts will be available soon. Please check back later.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simple counter animation
+    document.addEventListener("DOMContentLoaded", function() {
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200;
+        
+        counters.forEach(counter => {
+            const updateCount = () => {
+                const target = +counter.innerText.replace(/\D/g, '');
+                const count = +counter.innerText.replace(/\D/g, '');
+                
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + target / speed) + '+';
+                    setTimeout(updateCount, 1);
+                } else {
+                    counter.innerText = target + '+';
+                }
+            };
+            
+            updateCount();
+        });
+    });
+    
+    // Bootstrap tooltip initialization
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+    
+    // Image lazy loading fallback
+    document.addEventListener("DOMContentLoaded", function() {
+        if ('loading' in HTMLImageElement.prototype) {
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            images.forEach(img => {
+                img.src = img.dataset.src;
+            });
+        } else {
+            // Fallback for browsers that don't support lazy loading
+            const script = document.createElement('script');
+            script.src = "{% static 'js/lazysizes.min.js' %}";
+            document.body.appendChild(script);
+        }
+    });
+</script>
+{% endblock %}

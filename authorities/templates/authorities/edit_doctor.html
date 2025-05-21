@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Doctor - MyCure{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2">Edit Doctor</h1>
+            <p class="text-muted">Update doctor information for {{ doctor.name }}</p>
+        </div>
+        <div>
+            <a href="{% url 'manage_doctors' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Back to Doctors
+            </a>
+        </div>
+    </div>
+    
+    <!-- Edit Doctor Form -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Doctor Information</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+                
+                <div class="row g-3">
+                    <!-- Doctor Name -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">Doctor Name <span class="text-danger">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Specialization -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.specialization.id_for_label }}" class="form-label">Specialization <span class="text-danger">*</span></label>
+                            {{ form.specialization }}
+                            {% if form.specialization.errors %}
+                            <div class="text-danger">{{ form.specialization.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Qualification -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.qualification.id_for_label }}" class="form-label">Qualification <span class="text-danger">*</span></label>
+                            {{ form.qualification }}
+                            {% if form.qualification.errors %}
+                            <div class="text-danger">{{ form.qualification.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Experience Years -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.experience_years.id_for_label }}" class="form-label">Years of Experience <span class="text-danger">*</span></label>
+                            {{ form.experience_years }}
+                            {% if form.experience_years.errors %}
+                            <div class="text-danger">{{ form.experience_years.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Gender -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.gender.id_for_label }}" class="form-label">Gender <span class="text-danger">*</span></label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                            <div class="text-danger">{{ form.gender.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Consultation Fee -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.consultation_fee.id_for_label }}" class="form-label">Consultation Fee ($)</label>
+                            {{ form.consultation_fee }}
+                            {% if form.consultation_fee.errors %}
+                            <div class="text-danger">{{ form.consultation_fee.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="text-danger">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Phone -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">Phone</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                            <div class="text-danger">{{ form.phone.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Current Photo -->
+                    {% if doctor.photo %}
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label">Current Photo</label>
+                            <div>
+                                <img src="{{ doctor.photo.url }}" alt="{{ doctor.name }}" class="img-thumbnail" style="max-height: 150px;">
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Photo -->
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="{{ form.photo.id_for_label }}" class="form-label">Update Photo</label>
+                            {{ form.photo }}
+                            {% if form.photo.errors %}
+                            <div class="text-danger">{{ form.photo.errors }}</div>
+                            {% endif %}
+                            <div class="form-text text-muted">Upload a new photo if you want to change the current one. Leave empty to keep the current photo.</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bio -->
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="{{ form.bio.id_for_label }}" class="form-label">Doctor Bio</label>
+                            {{ form.bio }}
+                            {% if form.bio.errors %}
+                            <div class="text-danger">{{ form.bio.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Is Active -->
+                    <div class="col-md-12 mt-3">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="{{ form.is_active.id_for_label }}" name="{{ form.is_active.html_name }}" {% if form.is_active.value %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active Status</label>
+                            {% if form.is_active.errors %}
+                            <div class="text-danger">{{ form.is_active.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 d-flex justify-content-end">
+                    <a href="{% url 'manage_doctors' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

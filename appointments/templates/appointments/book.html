@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Book Appointment - {{ service.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Left Column - Service Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Service Information</h5>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">{{ service.name }}</h4>
+                    <p class="text-muted mb-3">{{ authority.name }}</p>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-user-md text-primary fa-2x me-3"></i>
+                        <div>
+                            <h6 class="mb-0">Doctor</h6>
+                            <p class="mb-0">{% if service.doctor %}Dr. {{ service.doctor.name }}{% else %}Not specified{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-clock text-primary fa-2x me-3"></i>
+                        <div>
+                            <h6 class="mb-0">Duration</h6>
+                            <p class="mb-0">{{ service.duration }} minutes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="fas fa-tags text-primary fa-2x me-3"></i>
+                        <div>
+                            <h6 class="mb-0">Price</h6>
+                            <p class="mb-0 text-success"><strong>₹{{ service.price }}</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Your appointment will require approval from {{ authority.name }} before it's confirmed.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Booking Form -->
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Book Your Appointment</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'book_appointment' service.id %}">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Your information:</label>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Name:</strong> {{ user.get_full_name }}</p>
+                                    <p class="mb-1"><strong>Email:</strong> {{ user.email }}</p>
+                                    <p class="mb-0"><strong>Phone:</strong> {{ user.phone_number }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.appointment_date.id_for_label }}" class="form-label">Select Date</label>
+                            {{ form.appointment_date }}
+                            {% if form.appointment_date.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.appointment_date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.slot_id.id_for_label }}" class="form-label">Select Time Slot</label>
+                            {{ form.slot_id }}
+                            {% if form.slot_id.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.slot_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Choose a suitable time slot from the available options.
+                            </small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Additional Notes (Optional)</label>
+                            {{ form.notes }}
+                            <small class="form-text text-muted">
+                                Include any symptoms, concerns, or questions you have for the healthcare provider.
+                            </small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calendar-check me-2"></i> Book Appointment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Enable date selection only for available days
+    document.addEventListener('DOMContentLoaded', function() {
+        const appointmentDate = document.getElementById('{{ form.appointment_date.id_for_label }}');
+        const slotSelect = document.getElementById('{{ form.slot_id.id_for_label }}');
+        
+        // Function to filter available dates based on selected time slot
+        appointmentDate.addEventListener('change', function() {
+            // Here you could add AJAX to check slot availability for the selected date
+        });
+    });
+</script>
+{% endblock %}

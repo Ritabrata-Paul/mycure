@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load static form_filters %} 
+{% block title %}Edit Service - MyCure{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'authority_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'manage_services' %}">Services</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit Service</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-pencil me-2"></i> Edit Service
+            </h5>
+            <span class="badge bg-light text-dark">ID: {{ service.id }}</span>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                    <p class="mb-0">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="row mb-4">
+                    <div class="col-lg-8">
+                        <!-- Service Name -->
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label fw-bold">Service Name <span class="text-danger">*</span></label>
+                            {{ form.name|addclass:"form-control" }}
+                            {% if form.name.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.name.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Enter a clear and concise name for the service.</div>
+                        </div>
+                        
+                        <!-- Service Price -->
+                        <div class="mb-3">
+                            <label for="{{ form.price.id_for_label }}" class="form-label fw-bold">Price <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.price|addclass:"form-control" }}
+                            </div>
+                            {% if form.price.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.price.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Set the price for this service.</div>
+                        </div>
+                        
+                        <!-- Service Duration -->
+                        <div class="mb-3">
+                            <label for="{{ form.duration_minutes.id_for_label }}" class="form-label fw-bold">Duration (minutes) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                {{ form.duration_minutes|addclass:"form-control" }}
+                                <span class="input-group-text">minutes</span>
+                            </div>
+                            {% if form.duration_minutes.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.duration_minutes.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">How long does this service typically take?</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <!-- Doctor Assignment -->
+                        <div class="mb-3">
+                            <label for="{{ form.doctor.id_for_label }}" class="form-label fw-bold">Assign Doctor (Optional)</label>
+                            {{ form.doctor|addclass:"form-select" }}
+                            {% if form.doctor.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.doctor.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Select a doctor who provides this service.</div>
+                        </div>
+                        
+                        <!-- Service Status -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Status</label>
+                            <div class="form-check form-switch">
+                                {{ form.is_active|addclass:"form-check-input" }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active</label>
+                            </div>
+                            <div class="form-text">Toggle to make this service available for booking.</div>
+                        </div>
+                        
+                        <!-- Service Stats -->
+                        <div class="card bg-light mt-4">
+                            <div class="card-body p-3">
+                                <h6 class="card-title">Service Statistics</h6>
+                                <div class="d-flex justify-content-between mb-2 small">
+                                    <span>Created on:</span>
+                                    <span class="text-muted">{{ service.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 small">
+                                    <span>Last updated:</span>
+                                    <span class="text-muted">{{ service.updated_at|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between small">
+                                    <span>Appointments:</span>
+                                    <span class="text-muted">{{ service.appointments.count }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service Description -->
+                <div class="mb-4">
+                    <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Description <span class="text-danger">*</span></label>
+                    {{ form.description|addclass:"form-control" }}
+                    {% if form.description.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.description.errors %}
+                        <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">Provide a detailed description of this service, including benefits and what patients can expect.</div>
+                </div>
+                
+                <div class="border-top pt-3 d-flex justify-content-between">
+                    <div>
+                        <a href="{% url 'manage_services' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i> Back to Services
+                        </a>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-danger me-2" data-bs-toggle="modal" data-bs-target="#deleteServiceModal">
+                            <i class="bi bi-trash me-2"></i> Delete Service
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Related Appointments Card -->
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Related Appointments</h5>
+        </div>
+        <div class="card-body">
+            {% if service.appointments.all %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in service.appointments.all|slice:":5" %}
+                        <tr>
+                            <td>{{ appointment.user.get_full_name }}</td>
+                            <td>{{ appointment.appointment_date|date:"M d, Y" }}</td>
+                            <td>{{ appointment.appointment_time }}</td>
+                            <td>
+                                <span class="badge {% if appointment.status == 'PENDING' %}bg-warning{% elif appointment.status == 'APPROVED' %}bg-success{% elif appointment.status == 'REJECTED' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    {{ appointment.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if service.appointments.count > 5 %}
+                <div class="text-center mt-3">
+                    <a href="#" class="btn btn-sm btn-outline-primary">View All {{ service.appointments.count }} Appointments</a>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-calendar-x text-muted" style="font-size: 2rem;"></i>
+                </div>
+                <p class="text-muted mb-0">No appointments found for this service.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Service Modal -->
+<div class="modal fade" id="deleteServiceModal" tabindex="-1" aria-labelledby="deleteServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteServiceModalLabel">Delete Service</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <p>Are you sure you want to delete the service <strong>{{ service.name }}</strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. All information associated with this service will be permanently deleted.
+                </div>
+                {% if service.appointments.exists %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>
+                    <strong>Important:</strong> This service has {{ service.appointments.count }} appointment(s). Deleting it may affect existing bookings.
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'delete_service' service.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Service</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        
+        // Fetch all forms we want to apply validation to
+        var forms = document.querySelectorAll('.needs-validation');
+        
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

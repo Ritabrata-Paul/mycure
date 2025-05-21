@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Authority Dashboard - MyCure{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">Welcome, {{ authority.name }}</h1>
+            <p class="text-muted">Manage your appointments, services, and more from this dashboard.</p>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 border-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Appointments</h5>
+                    <h2 class="display-4">{{ pending_appointments }}</h2>
+                    <p class="text-muted">Requiring your action</p>
+                    <a href="{% url 'authority_appointments' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 border-success">
+                <div class="card-body">
+                    <h5 class="card-title">Today's Appointments</h5>
+                    <h2 class="display-4">{{ today_appointments }}</h2>
+                    <p class="text-muted">Scheduled for today</p>
+                    <a href="{% url 'authority_appointments' %}" class="btn btn-sm btn-outline-success">View All</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 border-info">
+                <div class="card-body">
+                    <h5 class="card-title">Total Appointments</h5>
+                    <h2 class="display-4">{{ total_appointments }}</h2>
+                    <p class="text-muted">All time bookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 border-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Active Services</h5>
+                    <h2 class="display-4">{{ total_services }}</h2>
+                    <p class="text-muted">Available for booking</p>
+                    <a href="{% url 'manage_services' %}" class="btn btn-sm btn-outline-warning">Manage</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'authority_appointments' %}" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-calendar-check me-2"></i> Manage Appointments
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'manage_services' %}" class="btn btn-success btn-lg w-100">
+                                <i class="bi bi-list-check me-2"></i> Manage Services
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'manage_doctors' %}" class="btn btn-info btn-lg w-100 text-white">
+                                <i class="bi bi-person-badge me-2"></i> Manage Doctors
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'manage_slots' %}" class="btn btn-warning btn-lg w-100">
+                                <i class="bi bi-clock me-2"></i> Manage Time Slots
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Appointments -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Appointments</h5>
+                    <a href="{% url 'authority_appointments' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Patient</th>
+                                    <th>Service</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in recent_appointments %}
+                                <tr>
+                                    <td>{{ appointment.id }}</td>
+                                    <td>{{ appointment.user.get_full_name }}</td>
+                                    <td>{{ appointment.service.name }}</td>
+                                    <td>{{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time }}</td>
+                                    <td>
+                                        {% if appointment.status == 'PENDING' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% elif appointment.status == 'APPROVED' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif appointment.status == 'REJECTED' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                        {% elif appointment.status == 'CANCELLED' %}
+                                        <span class="badge bg-secondary">Cancelled</span>
+                                        {% elif appointment.status == 'COMPLETED' %}
+                                        <span class="badge bg-info">Completed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if appointment.status == 'PENDING' %}
+                                        <a href="{% url 'approve_appointment' appointment.id %}" class="btn btn-sm btn-success me-1">Approve</a>
+                                        <a href="{% url 'reject_appointment' appointment.id %}" class="btn btn-sm btn-danger">Reject</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No recent appointments found.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Authority Profile Summary -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Profile</h5>
+                    <a href="{% url 'edit_authority_profile' %}" class="btn btn-sm btn-outline-primary">Edit Profile</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            {% if authority.logo %}
+                            <img src="{{ authority.logo.url }}" alt="{{ authority.name }}" class="img-thumbnail mb-3" style="max-width: 100%; height: auto;">
+                            {% else %}
+                            <div class="bg-light rounded p-3 mb-3">
+                                <i class="bi bi-building display-4 text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h5>{{ authority.name }}</h5>
+                            <p class="badge bg-primary">{{ authority.get_authority_type_display }}</p>
+                            <p><i class="bi bi-geo-alt me-2"></i>{{ authority.city }}, {{ authority.state }}</p>
+                            {% if authority.is_verified %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle me-2"></i> Your authority is verified.
+                            </div>
+                            {% else %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i> Your authority is pending verification.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Calendar View Placeholder -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Calendar View</h5>
+                </div>
+                <div class="card-body">
+                    <div id="calendar-placeholder" class="bg-light rounded p-4 text-center">
+                        <i class="bi bi-calendar-week display-1 text-muted mb-3"></i>
+                        <h5>Calendar Integration</h5>
+                        <p class="text-muted">A calendar view of your appointments will be displayed here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Add any JavaScript for dashboard charts or widgets here -->
+{% endblock %}  

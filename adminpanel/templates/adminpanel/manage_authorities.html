@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manage Authorities | MyCure Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Manage Authorities</h1>
+        <a href="{% url 'add_authority' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Add New Authority
+        </a>
+    </div>
+    
+    <!-- Filters & Search -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'manage_authorities' %}" class="row g-3">
+                <!-- Authority Type Filter -->
+                <div class="col-md-3">
+                    <label for="authority_type" class="form-label">Authority Type</label>
+                    <select name="authority_type" id="authority_type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="HOSPITAL" {% if authority_type == 'HOSPITAL' %}selected{% endif %}>Hospital</option>
+                        <option value="CLINIC" {% if authority_type == 'CLINIC' %}selected{% endif %}>Clinic</option>
+                        <option value="DIAGNOSTIC" {% if authority_type == 'DIAGNOSTIC' %}selected{% endif %}>Diagnostic Center</option>
+                        
+                    </select>
+                </div>
+                
+                <!-- Verification Status Filter -->
+                <div class="col-md-2">
+                    <label for="verification_status" class="form-label">Status</label>
+                    <select name="verification_status" id="verification_status" class="form-select">
+                        <option value="">All</option>
+                        <option value="verified" {% if verification_status == 'verified' %}selected{% endif %}>Verified</option>
+                        <option value="unverified" {% if verification_status == 'unverified' %}selected{% endif %}>Unverified</option>
+                    </select>
+                </div>
+                
+                <!-- Search Field -->
+                <div class="col-md-5">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" name="search" id="search" value="{{ search_query|default:'' }}" class="form-control" placeholder="Search by name, location...">
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Authorities Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th>Added On</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for authority in authorities %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if authority.logo %}
+                                    <img src="{{ authority.logo.url }}" alt="{{ authority.name }}" class="me-2 rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-light rounded text-center me-2" style="width: 40px; height: 40px; line-height: 40px;">
+                                        <i class="fas fa-hospital text-secondary"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-medium">{{ authority.name }}</div>
+                                        <div class="small text-muted">ID: {{ authority.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if authority.authority_type == 'HOSPITAL' %}bg-primary
+                                    {% elif authority.authority_type == 'CLINIC' %}bg-success
+                                    {% elif authority.authority_type == 'DIAGNOSTIC' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ authority.get_authority_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ authority.city }}, {{ authority.state }}
+                            </td>
+                            <td>
+                                <a href="{% url 'user_detail' authority.user.id %}" class="text-decoration-none">
+                                    {{ authority.user.get_full_name|default:authority.user.email }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if authority.is_verified %}
+                                <span class="badge bg-success">Verified</span>
+                                {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ authority.created_at|date:"M d, Y" }}</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'admin_authority_detail' authority.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'edit_authority' authority.id %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'verify_authority' authority.id %}" class="btn btn-sm btn-outline-success" title="Verify/Unverify">
+                                        {% if authority.is_verified %}
+                                            <i class="fas fa-check-circle"></i>
+                                        {% else %}
+                                            <i class="fas fa-hourglass-start"></i>
+                                        {% endif %}
+                                    </a>
+                                    <a href="{% url 'delete_authority' authority.id %}" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <p class="text-muted mb-0">No authorities found</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if authorities.has_other_pages %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if authorities.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ authorities.previous_page_number }}{% if authority_type %}&authority_type={{ authority_type }}{% endif %}{% if verification_status %}&verification_status={{ verification_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+            </li>
+            {% endif %}
+            
+            {% for i in authorities.paginator.page_range %}
+                {% if authorities.number == i %}
+                <li class="page-item active">
+                    <span class="page-link">{{ i }}</span>
+                </li>
+                {% elif i > authorities.number|add:'-3' and i < authorities.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}{% if authority_type %}&authority_type={{ authority_type }}{% endif %}{% if verification_status %}&verification_status={{ verification_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if authorities.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ authorities.next_page_number }}{% if authority_type %}&authority_type={{ authority_type }}{% endif %}{% if verification_status %}&verification_status={{ verification_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    <!-- Statistics Section -->
+    <div class="row g-4 mt-3">
+        <!-- Authority Type Distribution -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Authority Type Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="authorityTypeChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Verification Status -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Verification Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <canvas id="verificationChart" height="200"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Verified</span>
+                                <span class="fw-bold">{{ verified_count }}</span>
+                            </div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {% widthratio verified_count verified_count|add:unverified_count 100 %}%"></div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Pending</span>
+                                <span class="fw-bold">{{ unverified_count }}</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-warning" role="progressbar" 
+                                     style="width: {% widthratio unverified_count verified_count|add:unverified_count 100 %}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Authority Locations Map -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Authority Locations</h5>
+                </div>
+                <div class="card-body">
+                    <div id="authorityMap" style="height: 400px;">
+                        <!-- In a real implementation, this would contain a map with authority markers -->
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Map feature requires integration with a mapping service like Google Maps or Mapbox.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        // Auto-submit form when filters change
+        $('#authority_type, #verification_status').change(function() {
+            $(this).closest('form').submit();
+        });
+        
+        // Authority Type Distribution Chart
+        const typeCtx = document.getElementById('authorityTypeChart').getContext('2d');
+        new Chart(typeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Hospital', 'Clinic', 'Diagnostic Center'],
+                datasets: [{
+                    label: 'Number of Authorities',
+                    data: [{{ hospitals_count }}, {{ clinics_count }}, {{ diagnostic_count }}],
+                    backgroundColor: [
+                        'rgba(13, 110, 253, 0.8)',
+                        'rgba(25, 135, 84, 0.8)',
+                        'rgba(13, 202, 240, 0.8)',
+                        'rgba(255, 193, 7, 0.8)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Verification Status Chart
+        const verificationCtx = document.getElementById('verificationChart').getContext('2d');
+        new Chart(verificationCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Verified', 'Pending'],
+                datasets: [{
+                    data: [{{ verified_count }}, {{ unverified_count }}],
+                    backgroundColor: [
+                        'rgba(25, 135, 84, 0.8)',
+                        'rgba(255, 193, 7, 0.8)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

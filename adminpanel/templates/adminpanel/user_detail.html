@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Details | MyCure Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'manage_users' %}">Users</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ user_detail.get_full_name }}</li>
+        </ol>
+    </nav>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">User Profile</h1>
+        <div>
+            <a href="{% url 'edit_user' user_detail.id %}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-edit me-1"></i> Edit User
+            </a>
+            <a href="{% url 'delete_user' user_detail.id %}" class="btn btn-outline-danger">
+                <i class="fas fa-trash me-1"></i> Delete User
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- User Information Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="bg-light rounded-circle mx-auto d-flex justify-content-center align-items-center" style="width: 100px; height: 100px;">
+                            <i class="fas fa-user-circle fa-4x text-secondary"></i>
+                        </div>
+                        <h4 class="mt-3">{{ user_detail.get_full_name }}</h4>
+                        <span class="badge {% if user_detail.user_type == 'CUSTOMER' %}bg-primary{% elif user_detail.user_type == 'AUTHORITY' %}bg-success{% else %}bg-danger{% endif %} px-3 py-2">
+                            {{ user_detail.get_user_type_display }}
+                        </span>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0 py-3 d-flex justify-content-between">
+                            <span class="text-muted">Email</span>
+                            <span class="fw-medium">{{ user_detail.email }}</span>
+                        </li>
+                        <li class="list-group-item px-0 py-3 d-flex justify-content-between">
+                            <span class="text-muted">Phone</span>
+                            <span class="fw-medium">{{ user_detail.phone_number|default:"Not provided" }}</span>
+                        </li>
+                        <li class="list-group-item px-0 py-3 d-flex justify-content-between">
+                            <span class="text-muted">Status</span>
+                            <span>
+                                {% if user_detail.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </span>
+                        </li>
+                        <li class="list-group-item px-0 py-3 d-flex justify-content-between">
+                            <span class="text-muted">Joined Date</span>
+                            <span class="fw-medium">{{ user_detail.date_joined|date:"M d, Y" }}</span>
+                        </li>
+                        <li class="list-group-item px-0 py-3 d-flex justify-content-between">
+                            <span class="text-muted">Last Login</span>
+                            <span class="fw-medium">
+                                {{ user_detail.last_login|date:"M d, Y H:i"|default:"Never" }}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right column - Authority details or Appointments -->
+        <div class="col-lg-8">
+            {% if user_detail.user_type == 'AUTHORITY' and authority %}
+            <!-- Authority Details -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Authority Details</h5>
+                    <a href="{% url 'admin_authority_detail' authority.id %}" class="btn btn-sm btn-outline-primary">
+                        View Authority
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        {% if authority.logo %}
+                        <img src="{{ authority.logo.url }}" alt="{{ authority.name }}" class="me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light rounded me-3 d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+                            <i class="fas fa-hospital fa-2x text-secondary"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-1">{{ authority.name }}</h5>
+                            <p class="mb-0 text-muted">{{ authority.get_authority_type_display }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Verification Status</small>
+                            {% if authority.is_verified %}
+                            <span class="badge bg-success">Verified</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Registration Number</small>
+                            {{ authority.registration_number|default:"Not provided" }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Address</small>
+                        {{ authority.address }}, {{ authority.city }}, {{ authority.state }} {{ authority.zipcode }}
+                    </div>
+
+                    <div>
+                        <small class="text-muted d-block">Description</small>
+                        <p>{{ authority.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user_detail.user_type == 'CUSTOMER' and appointments %}
+            <!-- Customer Appointments -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Appointments</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Authority</th>
+                                    <th>Service</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if appointment.authority.logo %}
+                                            <img src="{{ appointment.authority.logo.url }}" alt="{{ appointment.authority.name }}" class="me-2 rounded" style="width: 32px; height: 32px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="bg-light rounded me-2 d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;">
+                                                <i class="fas fa-hospital text-secondary"></i>
+                                            </div>
+                                            {% endif %}
+                                            <span>{{ appointment.authority.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ appointment.service.name }}</td>
+                                    <td>{{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time }}</td>
+                                    <td>
+                                        {% if appointment.status == 'PENDING' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif appointment.status == 'APPROVED' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif appointment.status == 'COMPLETED' %}
+                                        <span class="badge bg-info">Completed</span>
+                                        {% elif appointment.status == 'CANCELLED' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'admin_appointment_detail' appointment.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <p class="text-muted mb-0">No appointments found</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% if appointments.count > 5 %}
+                <div class="card-footer bg-white text-center">
+                    <a href="{% url 'all_appointments' %}?search={{ user_detail.email }}" class="text-decoration-none">
+                        View All Appointments <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Activity Log -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Activity Log</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0">Account Created</h6>
+                                <small class="text-muted">{{ user_detail.date_joined|date:"M d, Y H:i" }}</small>
+                            </div>
+                        </div>
+                        
+                        {% if user_detail.last_login %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0">Last Login</h6>
+                                <small class="text-muted">{{ user_detail.last_login|date:"M d, Y H:i" }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Add more activity items if you have logging enabled -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Timeline styling */
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+        border-left: 2px solid #e9ecef;
+        padding-left: 20px;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    .timeline-marker {
+        position: absolute;
+        left: -9px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        top: 0;
+    }
+</style>
+{% endblock %}

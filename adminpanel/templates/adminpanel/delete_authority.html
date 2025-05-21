@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Delete {{ authority.name }} | MyCure Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Delete Authority</h1>
+        <div>
+            <a href="{% url 'admin_authority_detail' authority.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Authority
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <div class="bg-danger-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                        </div>
+                        <h3 class="card-title">Delete Authority</h3>
+                        <p class="text-muted">Are you sure you want to delete the following authority?</p>
+                    </div>
+                    
+                    <div class="border rounded p-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            {% if authority.logo %}
+                            <img src="{{ authority.logo.url }}" alt="{{ authority.name }}" class="rounded-circle me-3" style="width: 64px; height: 64px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded-circle text-center me-3" style="width: 64px; height: 64px; line-height: 64px;">
+                                <i class="fas fa-hospital fa-2x text-secondary"></i>
+                            </div>
+                            {% endif %}
+                            <div class="text-start">
+                                <h4 class="mb-0">{{ authority.name }}</h4>
+                                <span class="badge 
+                                    {% if authority.authority_type == 'HOSPITAL' %}bg-primary
+                                    {% elif authority.authority_type == 'CLINIC' %}bg-success
+                                    {% elif authority.authority_type == 'LABORATORY' %}bg-info
+                                    {% elif authority.authority_type == 'PHARMACY' %}bg-warning
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ authority.get_authority_type_display }}
+                                </span>
+                                
+                                {% if authority.is_verified %}
+                                <span class="badge bg-success ms-1"><i class="fas fa-check-circle me-1"></i> Verified</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row text-start mt-3">
+                            <div class="col-md-6 mb-2">
+                                <div class="text-muted small">Email</div>
+                                <div>{{ authority.email }}</div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="text-muted small">Phone</div>
+                                <div>{{ authority.phone }}</div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="text-muted small">Address</div>
+                                <div>{{ authority.address }}</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="text-muted small">Owner Account</div>
+                                <div>{{ authority.user.get_full_name|default:authority.user.email }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone. Deleting this authority will permanently remove all associated data including doctors, services, and appointments.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center mt-4">
+                            <a href="{% url 'admin_authority_detail' authority.id %}" class="btn btn-outline-secondary me-2">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i> Delete Authority
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

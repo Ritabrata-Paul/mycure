@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Contact Messages | MyCure Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Contact Messages</h1>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+    
+    <!-- Filters & Search -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'contact_messages' %}" class="row g-3">
+                <!-- Status Filter -->
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="NEW" {% if status == 'NEW' %}selected{% endif %}>New</option>
+                        <option value="READ" {% if status == 'READ' %}selected{% endif %}>Read</option>
+                        <option value="REPLIED" {% if status == 'REPLIED' %}selected{% endif %}>Replied</option>
+                    </select>
+                </div>
+                
+                <!-- Search Field -->
+                <div class="col-md-7">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" name="search" id="search" value="{{ search_query|default:'' }}" class="form-control" placeholder="Search by name, email, subject...">
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Messages Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Received On</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for message in messages_list %}
+                        <tr {% if message.status == 'NEW' %}class="table-primary"{% endif %}>
+                            <td>#{{ message.id }}</td>
+                            <td>{{ message.name }}</td>
+                            <td>{{ message.email }}</td>
+                            <td>
+                                <div class="text-truncate" style="max-width: 250px;">{{ message.subject }}</div>
+                            </td>
+                            <td>
+                                <span class="badge {% if message.status == 'NEW' %}bg-danger
+                                               {% elif message.status == 'READ' %}bg-warning
+                                               {% elif message.status == 'REPLIED' %}bg-success
+                                               {% endif %}">
+                                    {{ message.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ message.created_at|date:"M d, Y H:i" }}</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'contact_message_detail' message.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'reply_contact_message' message.id %}" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-reply"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <p class="text-muted mb-0">No messages found</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if messages_list.has_other_pages %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if messages_list.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ messages_list.previous_page_number }}{% if status %}&status={{ status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+            </li>
+            {% endif %}
+            
+            {% for i in messages_list.paginator.page_range %}
+                {% if messages_list.number == i %}
+                <li class="page-item active">
+                    <span class="page-link">{{ i }}</span>
+                </li>
+                {% elif i > messages_list.number|add:'-3' and i < messages_list.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}{% if status %}&status={{ status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if messages_list.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ messages_list.next_page_number }}{% if status %}&status={{ status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    
+    <!-- Statistics -->
+    <div class="row g-4 mt-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Messages Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="messagesChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Recent Messages</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for message in messages_list|slice:":5" %}
+                        <li class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-medium">{{ message.name }}</span>
+                                    <span class="text-muted mx-2">•</span>
+                                    <span class="text-muted small">{{ message.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                <a href="{% url 'contact_message_detail' message.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                            </div>
+                            <div class="text-truncate text-muted small mt-1">{{ message.subject }}</div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center py-4">
+                            <p class="text-muted mb-0">No messages found</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        // Auto-submit form when filters change
+        $('#status').change(function() {
+            $(this).closest('form').submit();
+        });
+        
+        // Messages Status Chart
+        const ctx = document.getElementById('messagesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['New', 'Read', 'Replied'],
+                datasets: [{
+                    data: [
+                        {% with new_count=messages_list.filter|default:0 %}
+                        {{ new_count }},
+                        {% endwith %}
+                        {% with read_count=messages_list.filter|default:0 %}
+                        {{ read_count }},
+                        {% endwith %}
+                        {% with replied_count=messages_list.filter|default:0 %}
+                        {{ replied_count }}
+                        {% endwith %}
+                    ],
+                    backgroundColor: [
+                        'rgba(220, 53, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(25, 135, 84, 0.8)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
