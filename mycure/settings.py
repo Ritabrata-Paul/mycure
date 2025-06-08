@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-xtnludm@@840t-sogz-0^hdmz1-@c@)wo!@1)l78kz8%7-2ms5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['15.207.54.241', 'ec2-15-207-54-241.ap-south-1.compute.amazonaws.com', 'mycure360.com', 'www.mycure360.com']
+ALLOWED_HOSTS = ['15.207.54.241', 'ec2-15-207-54-241.ap-south-1.compute.amazonaws.com', 'mycure360.com', 'www.mycure360.com', '127.0.0.1']
 
 
 # Application definition
@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'appointments.middleware.DebugMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

@@ -7,6 +7,7 @@ urlpatterns = [
     # User management
     path('users/', views.manage_users_view, name='manage_users'),
     path('user/<int:user_id>/', views.user_detail_view, name='user_detail'),
+    path('user/add/', views.add_user_view, name='add_user'),
     path('user/<int:user_id>/edit/', views.edit_user_view, name='edit_user'),
     path('user/<int:user_id>/delete/', views.delete_user_view, name='delete_user'),
     

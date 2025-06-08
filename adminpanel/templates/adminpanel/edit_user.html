@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Edit User | MyCure Admin{% endblock %}
+{% block title %}Edit User | MyCure360 Admin{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -12,6 +12,11 @@
             <li class="breadcrumb-item"><a href="{% url 'user_detail' user_detail.id %}">{{ user_detail.get_full_name }}</a></li>
             <li class="breadcrumb-item active" aria-current="page">Edit</li>
         </ol>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{% url 'manage_users' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Users
+            </a>
+        </div>
     </nav>
 
     <div class="row justify-content-center">
@@ -71,6 +76,9 @@
                         <div class="mb-3">
                             <label for="{{ form.user_type.id_for_label }}" class="form-label">User Type</label>
                             {{ form.user_type }}
+                            {% if form.user_type.help_text %}
+                                <div class="form-text">{{ form.user_type.help_text }}</div>
+                            {% endif %}
                             {% if form.user_type.errors %}
                                 <div class="text-danger">{{ form.user_type.errors }}</div>
                             {% endif %}

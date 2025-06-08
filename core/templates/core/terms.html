@@ -1,17 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Terms & Conditions - MyCure{% endblock %}
+{% block title %}Terms & Conditions - MyCure360{% endblock %}
 {% block extra_css %}
-  <meta name="description" content="MyCure - Terms and Conditions of using our healthcare appointment system">
-  <meta name="author" content="mycure.com">
+  <meta name="description" content="MyCure360 - Terms and Conditions of using our healthcare appointment system">
+  <meta name="author" content="mycure360.com">
   <!-- Favicon -->
   <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}" />
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <style>
     /* Custom styles for the terms page */
     :root {
@@ -203,6 +197,7 @@
     }
   </style>
 {% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
 <section class="terms-hero-section">
@@ -255,9 +250,9 @@
         <!-- Introduction -->
         <div class="terms-block" id="introduction">
           <h3>1. Introduction</h3>
-          <p>Welcome to MyCure ("we," "our," or "us"). By using our website, mobile application, and services (collectively, the "Services"), you agree to be bound by these Terms & Conditions ("Terms"). Please read these Terms carefully before using our Services.</p>
+          <p>Welcome to MyCure360 ("we," "our," or "us"). By using our website, mobile application, and services (collectively, the "Services"), you agree to be bound by these Terms & Conditions ("Terms"). Please read these Terms carefully before using our Services.</p>
           <p>By accessing or using MyCure, you agree to these Terms. If you do not agree with any part of these Terms, you may not use our Services.</p>
-          <p>These Terms constitute a legally binding agreement between you and MyCure regarding your use of the Services. Our Services are designed to connect users with healthcare providers for appointment booking and related healthcare services.</p>
+          <p>These Terms constitute a legally binding agreement between you and MyCure360 regarding your use of the Services. Our Services are designed to connect users with healthcare providers for appointment booking and related healthcare services.</p>
         </div>
         
         <!-- User Accounts -->
@@ -273,7 +268,7 @@
           <h3>3. Healthcare Services</h3>
           <p>MyCure is a platform that connects users with healthcare providers. We do not provide medical advice, diagnosis, or treatment. All healthcare services are provided by independent healthcare providers who are not employees or agents of MyCure.</p>
           <p>We do not recommend or endorse any specific healthcare providers or healthcare services. Any information provided through our Services is for informational purposes only and should not be considered medical advice.</p>
-          <p>The relationship for healthcare services is between you and the healthcare provider you choose. MyCure is not responsible for the quality, timing, or any other aspect of the healthcare services provided by these providers.</p>
+          <p>The relationship for healthcare services is between you and the healthcare provider you choose. MyCure360 is not responsible for the quality, timing, or any other aspect of the healthcare services provided by these providers.</p>
         </div>
         
         <!-- Appointment Booking -->
@@ -311,7 +306,7 @@
         <!-- Intellectual Property -->
         <div class="terms-block">
           <h3>7. Intellectual Property</h3>
-          <p>All content, features, and functionality of our Services, including but not limited to text, graphics, logos, icons, and images, are owned by MyCure or our licensors and are protected by copyright, trademark, and other intellectual property laws.</p>
+          <p>All content, features, and functionality of our Services, including but not limited to text, graphics, logos, icons, and images, are owned by MyCure360 or our licensors and are protected by copyright, trademark, and other intellectual property laws.</p>
           <p>You may not reproduce, distribute, modify, create derivative works of, publicly display, publicly perform, republish, download, store, or transmit any of the material on our Services without our prior written consent.</p>
           <p>Any feedback, comments, or suggestions you may provide regarding our Services is entirely voluntary, and we will be free to use such feedback, comments, or suggestions without any obligation to you.</p>
         </div>
@@ -372,12 +367,9 @@
 <a href="#" class="back-to-top text-decoration-none">
   <i class="fas fa-chevron-up"></i>
 </a>
+{% endblock %}
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Custom JS -->
+{% block extra_js %}
 <script>
   $(document).ready(function() {
     // Back to top button

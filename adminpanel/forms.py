@@ -27,6 +27,15 @@ class UserForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # If editing an admin user, disable user_type field
+        if self.instance and self.instance.user_type == 'ADMIN':
+            self.fields['user_type'].widget.attrs['disabled'] = 'disabled'
+            self.fields['user_type'].help_text = "Admin user type cannot be changed"
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'phone_number', 'user_type', 'is_active']
@@ -100,6 +109,26 @@ class AuthorityCreationForm(forms.ModelForm):
         required=False,
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
+
+
+    # Timing fields
+    opening_time = forms.TimeField(
+        initial='09:00',
+        widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        help_text="Opening time (24-hour format)"
+    )
+    closing_time = forms.TimeField(
+        initial='18:00',
+        widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        help_text="Closing time (24-hour format)"
+    )
+    open_on_weekends = forms.BooleanField(
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Check if open on weekends"
+    )
+
     latitude = forms.FloatField(
         required=False,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'step': 'any'})
@@ -129,13 +158,25 @@ class AuthorityCreationForm(forms.ModelForm):
     class Meta:
         model = Authority
         fields = ['name', 'authority_type', 'description', 'address', 'email', 'phone', 
-                 'website', 'city', 'state', 'postal_code', 'latitude', 'longitude', 
-                 'logo', 'established_date', 'registration_number', 'is_verified', 'user']
+                 'website', 'city', 'state', 'postal_code', 'opening_time', 'closing_time', 
+                 'open_on_weekends', 'latitude', 'longitude', 'logo', 'established_date', 
+                 'registration_number', 'is_verified', 'user']
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Make some fields optional
         self.fields['user'].required = False  # We'll handle this in the view based on account_type
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        opening_time = cleaned_data.get('opening_time')
+        closing_time = cleaned_data.get('closing_time')
+        
+        # Validate that closing time is after opening time
+        if opening_time and closing_time and closing_time <= opening_time:
+            raise forms.ValidationError("Closing time must be after opening time.")
+            
+        return cleaned_data
 
 class ContactMessageReplyForm(forms.Form):
     """Form for replying to contact messages"""

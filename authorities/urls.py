@@ -32,6 +32,7 @@ urlpatterns = [
     path('slot/add/', views.add_slot_view, name='add_slot'),
     path('slot/<int:slot_id>/edit/', views.edit_slot_view, name='edit_slot'),
     path('slot/<int:slot_id>/delete/', views.delete_slot_view, name='delete_slot'),
+    path('slot/<int:slot_id>/change-status/', views.change_slot_status, name='change_slot_status'),  # Added this line
     
     # Profile management
     path('profile/', views.authority_profile_view, name='authority_profile'),

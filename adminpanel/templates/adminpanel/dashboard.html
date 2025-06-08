@@ -1,179 +1,550 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}Admin Dashboard | MyCure360{% endblock %}
 
-{% block title %}Admin Dashboard | MyCure{% endblock %}
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --info-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        --danger-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        --card-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        --hover-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        --border-radius: 12px;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .dashboard-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: var(--card-shadow);
+    }
+
+    .dashboard-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-subtitle {
+        opacity: 0.9;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+    }
+
+    .stat-card.success::before { background: var(--success-gradient); }
+    .stat-card.warning::before { background: var(--warning-gradient); }
+    .stat-card.info::before { background: var(--info-gradient); }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+    }
+
+    .stat-label {
+        color: #718096;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .action-card {
+        background: white;
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+    }
+
+    .action-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .section-card {
+        background: white;
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid #dee2e6;
+        padding: 1.25rem 1.5rem;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0;
+    }
+
+    .table-modern {
+        font-size: 0.9rem;
+    }
+
+    .table-modern thead th {
+        background: #f8f9fa;
+        border: none;
+        color: #4a5568;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+    }
+
+    .table-modern tbody td {
+        border: none;
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .table-modern tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-modern {
+        border-radius: 8px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .quick-actions {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+    }
+
+    .quick-action-btn {
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: block;
+        text-align: center;
+    }
+
+    .quick-action-btn:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .progress-ring {
+        width: 80px;
+        height: 80px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #718096;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-title {
+            font-size: 2rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <h1 class="mb-4">Admin Dashboard</h1>
-    
-    <!-- Stats Cards -->
-    <div class="row g-3 mb-4">
-        <!-- Users Stats -->
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Users</h6>
-                            <h3 class="mb-0">{{ users_count }}</h3>
-                        </div>
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
-                            <i class="fas fa-users text-primary"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer border-0 bg-transparent py-2">
-                    <a href="{% url 'manage_users' %}" class="text-decoration-none small">View all users</a>
-                </div>
+<div class="dashboard-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-tachometer-alt me-3"></i>
+                    Admin Dashboard
+                </h1>
+                <p class="dashboard-subtitle mb-0">
+                    Welcome back! Here's what's happening with MyCure360 today.
+                </p>
             </div>
-        </div>
-        
-        <!-- Authorities Stats -->
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Authorities</h6>
-                            <h3 class="mb-0">{{ authorities_count }}</h3>
-                        </div>
-                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
-                            <i class="fas fa-hospital text-success"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer border-0 bg-transparent py-2">
-                    <a href="{% url 'manage_authorities' %}" class="text-decoration-none small">View all authorities</a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Appointments Stats -->
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Appointments</h6>
-                            <h3 class="mb-0">{{ appointments_count }}</h3>
-                        </div>
-                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
-                            <i class="fas fa-calendar-check text-info"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer border-0 bg-transparent py-2">
-                    <a href="{% url 'all_appointments' %}" class="text-decoration-none small">View all appointments</a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Messages Stats -->
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">New Messages</h6>
-                            <h3 class="mb-0">{{ new_messages }}</h3>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
-                            <i class="fas fa-envelope text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer border-0 bg-transparent py-2">
-                    <a href="{% url 'contact_messages' %}" class="text-decoration-none small">View all messages</a>
+            <div class="col-md-4 text-md-end">
+                <div class="text-white">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    <span id="current-date"></span>
                 </div>
             </div>
         </div>
     </div>
-    
+</div>
+
+<div class="container-fluid">
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card h-100">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <p class="stat-label mb-2">Total Users</p>
+                            <h3 class="stat-number">{{ users_count|default:0 }}</h3>
+                            <div class="text-success small mt-2">
+                                <i class="fas fa-arrow-up me-1"></i>
+                                +{{ recent_users|length }} this week
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a href="{% url 'manage_users' %}" class="btn btn-modern btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-eye me-2"></i>View All Users
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card success h-100">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <p class="stat-label mb-2">Total Authorities</p>
+                            <h3 class="stat-number">{{ authorities_count|default:0 }}</h3>
+                            <div class="text-warning small mt-2">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ pending_authorities }} pending
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="stat-icon" style="background: var(--success-gradient); color: white;">
+                                <i class="fas fa-hospital"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a href="{% url 'manage_authorities' %}" class="btn btn-modern btn-outline-success btn-sm w-100">
+                        <i class="fas fa-hospital me-2"></i>Manage Authorities
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card info h-100">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <p class="stat-label mb-2">Appointments</p>
+                            <h3 class="stat-number">{{ appointments_count|default:0 }}</h3>
+                            <div class="text-info small mt-2">
+                                <i class="fas fa-hourglass-half me-1"></i>
+                                {{ pending_appointments }} pending
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="stat-icon" style="background: var(--info-gradient); color: #2d3748;">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a href="{% url 'all_appointments' %}" class="btn btn-modern btn-outline-info btn-sm w-100">
+                        <i class="fas fa-calendar-alt me-2"></i>View Appointments
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card warning h-100">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <p class="stat-label mb-2">New Messages</p>
+                            <h3 class="stat-number">{{ new_messages|default:0 }}</h3>
+                            <div class="text-danger small mt-2">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                Needs attention
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="stat-icon" style="background: var(--warning-gradient); color: white;">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a href="{% url 'contact_messages' %}" class="btn btn-modern btn-outline-warning btn-sm w-100">
+                        <i class="fas fa-comments me-2"></i>View Messages
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h4 class="mb-2">
+                    <i class="fas fa-bolt me-2"></i>
+                    Quick Actions
+                </h4>
+                <p class="mb-0 opacity-75">Manage your platform efficiently with these shortcuts</p>
+            </div>
+            <div class="col-md-6">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <a href="{% url 'manage_authorities' %}?verification_status=unverified" class="quick-action-btn">
+                            <i class="fas fa-user-check d-block mb-2"></i>
+                            Verify Authorities
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'all_appointments' %}?status=PENDING" class="quick-action-btn">
+                            <i class="fas fa-clock d-block mb-2"></i>
+                            Pending Appointments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Action Cards -->
-    <div class="row g-4 mb-4">
-        <!-- Pending Authorities -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0">
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="card action-card h-100">
+                <div class="section-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Pending Authorities</h5>
-                        <span class="badge bg-warning rounded-pill">{{ pending_authorities }}</span>
+                        <h5 class="section-title">
+                            <i class="fas fa-user-clock me-2 text-warning"></i>
+                            Pending Authorities
+                        </h5>
+                        <span class="badge badge-modern bg-warning text-dark">{{ pending_authorities|default:0 }}</span>
                     </div>
                 </div>
                 <div class="card-body">
                     {% if pending_authorities > 0 %}
-                    <p class="text-muted">There are {{ pending_authorities }} authorities waiting for verification.</p>
-                    <a href="{% url 'manage_authorities' %}?verification_status=unverified" class="btn btn-outline-primary">Review Pending Authorities</a>
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <p class="text-muted mb-3">{{ pending_authorities }} authorities awaiting verification</p>
+                                <a href="{% url 'manage_authorities' %}?verification_status=unverified" 
+                                   class="btn btn-modern btn-warning">
+                                    <i class="fas fa-search me-2"></i>Review Now
+                                </a>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div class="display-4 text-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                            </div>
+                        </div>
                     {% else %}
-                    <p class="text-success mb-0">All authorities have been verified!</p>
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <h6 class="mt-3">All Caught Up!</h6>
+                            <p class="mb-0">All authorities have been verified.</p>
+                        </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-        
-        <!-- Pending Appointments -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0">
+
+        <div class="col-lg-6">
+            <div class="card action-card h-100">
+                <div class="section-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Pending Appointments</h5>
-                        <span class="badge bg-info rounded-pill">{{ pending_appointments }}</span>
+                        <h5 class="section-title">
+                            <i class="fas fa-calendar-times me-2 text-info"></i>
+                            Pending Appointments
+                        </h5>
+                        <span class="badge badge-modern bg-info">{{ pending_appointments|default:0 }}</span>
                     </div>
                 </div>
                 <div class="card-body">
                     {% if pending_appointments > 0 %}
-                    <p class="text-muted">There are {{ pending_appointments }} appointments waiting for approval.</p>
-                    <a href="{% url 'all_appointments' %}?status=PENDING" class="btn btn-outline-primary">View Pending Appointments</a>
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <p class="text-muted mb-3">{{ pending_appointments }} appointments need approval</p>
+                                <a href="{% url 'all_appointments' %}?status=PENDING" 
+                                   class="btn btn-modern btn-info">
+                                    <i class="fas fa-calendar-check me-2"></i>Review Now
+                                </a>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div class="display-4 text-info">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                            </div>
+                        </div>
                     {% else %}
-                    <p class="text-success mb-0">No pending appointments at the moment!</p>
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <h6 class="mt-3">All Set!</h6>
+                            <p class="mb-0">No pending appointments at the moment.</p>
+                        </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Recent Activities Section -->
+
+    <!-- Data Tables -->
     <div class="row">
         <!-- Recent Users -->
-        <div class="col-md-6 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0">
+        <div class="col-lg-6 mb-4">
+            <div class="card section-card">
+                <div class="section-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Recent Users</h5>
-                        <a href="{% url 'manage_users' %}" class="text-decoration-none small">View all</a>
+                        <h5 class="section-title">
+                            <i class="fas fa-users me-2 text-primary"></i>
+                            Recent Users
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'manage_users' %}" class="btn btn-modern btn-outline-primary btn-sm">
+                                View All
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
+                        <table class="table table-modern mb-0">
+                            <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
+                                    <th>User</th>
                                     <th>Type</th>
                                     <th>Joined</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for user in recent_users %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'user_detail' user.id %}" class="text-decoration-none">
-                                            {{ user.get_full_name|default:user.email }}
-                                        </a>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                <i class="fas fa-user text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">{{ user.get_full_name|default:user.email }}</div>
+                                                <small class="text-muted">{{ user.email }}</small>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td>{{ user.email }}</td>
                                     <td>
-                                        <span class="badge {% if user.user_type == 'CUSTOMER' %}bg-primary{% elif user.user_type == 'AUTHORITY' %}bg-success{% else %}bg-danger{% endif %}">
+                                        <span class="badge badge-modern {% if user.user_type == 'CUSTOMER' %}bg-primary{% elif user.user_type == 'AUTHORITY' %}bg-success{% else %}bg-danger{% endif %}">
                                             {{ user.get_user_type_display }}
                                         </span>
                                     </td>
                                     <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'user_detail' user.id %}" 
+                                           class="btn btn-modern btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center py-3">No users found</td>
+                                    <td colspan="4" class="empty-state">
+                                        <i class="fas fa-users"></i>
+                                        <p class="mb-0">No users found</p>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -182,53 +553,65 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Recent Appointments -->
-        <div class="col-md-6 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0">
+        <div class="col-lg-6 mb-4">
+            <div class="card section-card">
+                <div class="section-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Recent Appointments</h5>
-                        <a href="{% url 'all_appointments' %}" class="text-decoration-none small">View all</a>
+                        <h5 class="section-title">
+                            <i class="fas fa-calendar-alt me-2 text-success"></i>
+                            Recent Appointments
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'all_appointments' %}" class="btn btn-modern btn-outline-success btn-sm">
+                                View All
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
+                        <table class="table table-modern mb-0">
+                            <thead>
                                 <tr>
-                                    <th>Authority</th>
-                                    <th>Patient</th>
+                                    <th>Details</th>
                                     <th>Date</th>
                                     <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for appointment in recent_appointments %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'admin_authority_detail' appointment.authority.id %}" class="text-decoration-none">
-                                            {{ appointment.authority.name }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'user_detail' appointment.user.id %}" class="text-decoration-none">
-                                            {{ appointment.user.get_full_name|default:appointment.user.email }}
-                                        </a>
+                                        <div>
+                                            <div class="fw-semibold">{{ appointment.authority.name }}</div>
+                                            <small class="text-muted">{{ appointment.user.get_full_name|default:appointment.user.email }}</small>
+                                        </div>
                                     </td>
                                     <td>{{ appointment.appointment_date|date:"M d, Y" }}</td>
                                     <td>
-                                        <span class="badge {% if appointment.status == 'PENDING' %}bg-warning
+                                        <span class="badge badge-modern {% if appointment.status == 'PENDING' %}bg-warning text-dark
                                                            {% elif appointment.status == 'APPROVED' %}bg-success
                                                            {% elif appointment.status == 'COMPLETED' %}bg-info
                                                            {% else %}bg-danger{% endif %}">
                                             {{ appointment.get_status_display }}
                                         </span>
                                     </td>
+                                    <td>
+                                        <a href="{% url 'admin_authority_detail' appointment.authority.id %}" 
+                                           class="btn btn-modern btn-outline-success btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center py-3">No appointments found</td>
+                                    <td colspan="4" class="empty-state">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <p class="mb-0">No appointments found</p>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -238,23 +621,31 @@
             </div>
         </div>
     </div>
-    
-    <!-- New Contact Messages -->
+
+    <!-- Contact Messages -->
     <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0">
+        <div class="col-12">
+            <div class="card section-card">
+                <div class="section-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">New Contact Messages</h5>
-                        <a href="{% url 'contact_messages' %}" class="text-decoration-none small">View all</a>
+                        <h5 class="section-title">
+                            <i class="fas fa-envelope me-2 text-warning"></i>
+                            New Contact Messages
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <span class="badge badge-modern bg-warning text-dark">{{ new_contact_messages|length }} New</span>
+                            <a href="{% url 'contact_messages' %}" class="btn btn-modern btn-outline-warning btn-sm">
+                                View All Messages
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
+                        <table class="table table-modern mb-0">
+                            <thead>
                                 <tr>
-                                    <th>From</th>
+                                    <th>Sender</th>
                                     <th>Subject</th>
                                     <th>Received</th>
                                     <th>Actions</th>
@@ -263,21 +654,42 @@
                             <tbody>
                                 {% for message in new_contact_messages %}
                                 <tr>
-                                    <td>{{ message.name }} ({{ message.email }})</td>
-                                    <td>{{ message.subject }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                                                <i class="fas fa-envelope text-warning"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">{{ message.name }}</div>
+                                                <small class="text-muted">{{ message.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium">{{ message.subject }}</div>
+                                        <small class="text-muted">{{ message.message|truncatewords:8 }}</small>
+                                    </td>
                                     <td>{{ message.created_at|date:"M d, Y H:i" }}</td>
                                     <td>
-                                        <a href="{% url 'contact_message_detail' message.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                        <a href="{% url 'reply_contact_message' message.id %}" class="btn btn-sm btn-outline-success">
-                                            <i class="fas fa-reply"></i> Reply
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'contact_message_detail' message.id %}" 
+                                               class="btn btn-modern btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </a>
+                                            <a href="{% url 'reply_contact_message' message.id %}" 
+                                               class="btn btn-modern btn-outline-success btn-sm">
+                                                <i class="fas fa-reply me-1"></i>Reply
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center py-3">No new messages</td>
+                                    <td colspan="4" class="empty-state">
+                                        <i class="fas fa-inbox"></i>
+                                        <h6 class="mt-3">No New Messages</h6>
+                                        <p class="mb-0">All messages have been handled.</p>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -292,9 +704,184 @@
 
 {% block extra_js %}
 <script>
-    // You can add dashboard-specific JavaScript here
-    $(document).ready(function() {
-        // Any dashboard initialization code
+$(document).ready(function() {
+    // Display current date
+    const today = new Date();
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+    document.getElementById('current-date').textContent = today.toLocaleDateString('en-US', options);
+    
+    // Add loading states for action buttons
+    $('.btn-modern').on('click', function() {
+        const $btn = $(this);
+        const originalText = $btn.html();
+        
+        $btn.html('<i class="fas fa-spinner fa-spin me-2"></i>Loading...');
+        $btn.prop('disabled', true);
+        
+        // Re-enable after 2 seconds (adjust as needed)
+        setTimeout(function() {
+            $btn.html(originalText);
+            $btn.prop('disabled', false);
+        }, 2000);
     });
+    
+    // Add smooth scrolling for internal links
+    $('a[href^="#"]').on('click', function(event) {
+        const target = $(this.getAttribute('href'));
+        if (target.length) {
+            event.preventDefault();
+            $('html, body').stop().animate({
+                scrollTop: target.offset().top - 100
+            }, 1000);
+        }
+    });
+    
+    // Initialize tooltips if Bootstrap tooltips are available
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    
+    // Add counter animation for statistics
+    function animateCounter(element, target) {
+        let current = 0;
+        const increment = target / 100;
+        const timer = setInterval(function() {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            element.textContent = Math.floor(current);
+        }, 20);
+    }
+    
+    // Animate counters when page loads
+    $('.stat-number').each(function() {
+        const target = parseInt($(this).text());
+        if (!isNaN(target)) {
+            animateCounter(this, target);
+        }
+    });
+    
+    // Add real-time updates every 30 seconds (optional)
+    setInterval(function() {
+        // You can add AJAX calls here to update dashboard data
+        console.log('Dashboard refresh check...');
+    }, 30000);
+    
+    // Add notification system for new messages
+    function showNotification(message, type = 'info') {
+        const notification = $(`
+            <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                <i class="fas fa-info-circle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+        
+        $('body').append(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(function() {
+            notification.alert('close');
+        }, 5000);
+    }
+    
+    // Check for urgent items and show notifications
+    const pendingAuthorities = {{ pending_authorities|default:0 }};
+    const pendingAppointments = {{ pending_appointments|default:0 }};
+    const newMessages = {{ new_messages|default:0 }};
+    
+    if (pendingAuthorities > 0) {
+        setTimeout(function() {
+            showNotification(`You have ${pendingAuthorities} authorities pending verification.`, 'warning');
+        }, 2000);
+    }
+    
+    if (newMessages > 5) {
+        setTimeout(function() {
+            showNotification(`You have ${newMessages} new messages that need attention.`, 'info');
+        }, 4000);
+    }
+    
+    // Add search functionality to tables
+    function addTableSearch(tableSelector) {
+        const $table = $(tableSelector);
+        const $searchInput = $(`
+            <div class="mb-3">
+                <input type="text" class="form-control" placeholder="Search..." 
+                       style="max-width: 300px;">
+            </div>
+        `);
+        
+        $table.before($searchInput);
+        
+        $searchInput.find('input').on('keyup', function() {
+            const value = $(this).val().toLowerCase();
+            $table.find('tbody tr').filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+    }
+    
+    // Initialize search for all tables
+    $('.table-modern').each(function() {
+        if ($(this).find('tbody tr').length > 5) {
+            addTableSearch(this);
+        }
+    });
+    
+    // Add responsive behavior for mobile
+    function handleMobileView() {
+        if (window.innerWidth < 768) {
+            $('.table-responsive').addClass('mobile-scroll');
+            $('.btn-group').addClass('btn-group-vertical');
+        } else {
+            $('.table-responsive').removeClass('mobile-scroll');
+            $('.btn-group').removeClass('btn-group-vertical');
+        }
+    }
+    
+    // Check on load and resize
+    handleMobileView();
+    $(window).resize(handleMobileView);
+    
+    // Add keyboard shortcuts
+    $(document).keydown(function(e) {
+        // Alt + U for Users
+        if (e.altKey && e.keyCode === 85) {
+            window.location.href = "{% url 'manage_users' %}";
+        }
+        // Alt + A for Authorities
+        if (e.altKey && e.keyCode === 65) {
+            window.location.href = "{% url 'manage_authorities' %}";
+        }
+        // Alt + M for Messages
+        if (e.altKey && e.keyCode === 77) {
+            window.location.href = "{% url 'contact_messages' %}";
+        }
+    });
+    
+    // Add refresh button functionality
+    $('.refresh-btn').on('click', function() {
+        location.reload();
+    });
+    
+    // Progressive loading for better performance
+    $('.card').each(function(index) {
+        $(this).css('opacity', '0').delay(index * 100).animate({
+            opacity: 1
+        }, 500);
+    });
+});
 </script>
 {% endblock %}

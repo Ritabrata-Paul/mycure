@@ -1,6 +1,23 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}{{ authority.name }} - MyCure{% endblock %}
+{% block title %}{{ authority.name }} - MyCure360{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<style>
+    .map-container {
+        height: 250px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    #authority-map {
+        height: 100%;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <div class="row">
@@ -33,7 +50,7 @@
                             <ul class="list-unstyled">
                                 <li class="mb-2">
                                     <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                                    {{ authority.address }}, {{ authority.city }}, {{ authority.state }} - {{ authority.pincode }}
+                                    {{ authority.address }}, {{ authority.city }}, {{ authority.state }} - {{ authority.postal_code }}
                                 </li>
                                 <li class="mb-2">
                                     <i class="fas fa-phone text-primary me-2"></i>
@@ -183,23 +200,6 @@
                                 <button type="button" class="btn btn-primary" id="sidebar-book-btn">Book Now</button>
                             </div>
                         </form>
-                        
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                // Handle the sidebar booking button click
-                                document.getElementById('sidebar-book-btn').addEventListener('click', function() {
-                                    const serviceSelect = document.getElementById('service-select');
-                                    const serviceId = serviceSelect.value;
-                                    
-                                    if (serviceId) {
-                                        // Redirect to the booking page for the selected service
-                                        window.location.href = "{% url 'book_appointment' 0 %}".replace('0', serviceId);
-                                    } else {
-                                        alert('Please select a service first.');
-                                    }
-                                });
-                            });
-                        </script>
                     {% else %}
                         <div class="text-center py-2">
                             <p class="text-muted">No services available for booking at the moment.</p>
@@ -214,19 +214,144 @@
                     <h5 class="mb-0">Location</h5>
                 </div>
                 <div class="card-body">
-                    <p>{{ authority.address }}, {{ authority.city }}, {{ authority.state }} - {{ authority.pincode }}</p>
-                    <div class="ratio ratio-4x3 mt-3 bg-light">
-                        <!-- Map placeholder -->
-                        <div class="d-flex align-items-center justify-content-center">
-                            <p class="text-center text-muted">
-                                <i class="fas fa-map-marked-alt fa-3x mb-3"></i><br>
-                                Map location available in full version
-                            </p>
+                    <p class="mb-3">{{ authority.address }}, {{ authority.city }}, {{ authority.state }} - {{ authority.postal_code }}</p>
+                    
+                    {% if authority.latitude and authority.longitude %}
+                        <!-- Interactive Map -->
+                        <div class="map-container">
+                            <div id="authority-map"></div>
                         </div>
-                    </div>
+                        
+                        <!-- Get directions button -->
+                        <div class="mt-3">
+                            <a href="https://www.google.com/maps/dir/?api=1&destination={{ authority.latitude }},{{ authority.longitude }}" 
+                               target="_blank" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-directions me-2"></i>Get Directions
+                            </a>
+                        </div>
+                    {% else %}
+                        <!-- Fallback when no coordinates -->
+                        <div class="ratio ratio-4x3 mt-3 bg-light">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-map-marked-alt fa-3x mb-3"></i><br>
+                                    <p>Location coordinates not available</p>
+                                    <a href="https://www.google.com/maps/search/{{ authority.name }}+{{ authority.city }}" 
+                                       target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-search me-2"></i>Search on Google Maps
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle the sidebar booking button click
+    const sidebarBookBtn = document.getElementById('sidebar-book-btn');
+    if (sidebarBookBtn) {
+        sidebarBookBtn.addEventListener('click', function() {
+            const serviceSelect = document.getElementById('service-select');
+            const serviceId = serviceSelect.value;
+            
+            if (serviceId) {
+                // Redirect to the booking page for the selected service
+                window.location.href = "{% url 'book_appointment' 0 %}".replace('0', serviceId);
+            } else {
+                alert('Please select a service first.');
+            }
+        });
+    }
+
+    // Initialize map if coordinates are available
+    {% if authority.latitude and authority.longitude %}
+        // Initialize the map
+        const map = L.map('authority-map').setView([{{ authority.latitude }}, {{ authority.longitude }}], 15);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Create custom icon based on authority type
+        let iconClass = 'fa-hospital';
+        let iconColor = '#dc3545'; // Red for hospital
+        
+        {% if authority.authority_type == 'CLINIC' %}
+            iconClass = 'fa-clinic-medical';
+            iconColor = '#198754'; // Green for clinic
+        {% elif authority.authority_type == 'DIAGNOSTIC' %}
+            iconClass = 'fa-microscope';
+            iconColor = '#0d6efd'; // Blue for diagnostic
+        {% endif %}
+
+        // Create a custom HTML marker
+        const customIcon = L.divIcon({
+            html: `<div style="background-color: ${iconColor}; color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="fas ${iconClass}"></i></div>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
+            popupAnchor: [0, -20],
+            className: 'custom-map-marker'
+        });
+
+        // Add marker to the map
+        const marker = L.marker([{{ authority.latitude }}, {{ authority.longitude }}], {
+            icon: customIcon
+        }).addTo(map);
+
+        // Add popup to marker
+        marker.bindPopup(`
+            <div class="text-center">
+                <strong>{{ authority.name }}</strong><br>
+                <small class="text-muted">{{ authority.get_authority_type_display }}</small><br>
+                <small>{{ authority.address }}</small><br>
+                <a href="https://www.google.com/maps/dir/?api=1&destination={{ authority.latitude }},{{ authority.longitude }}" 
+                   target="_blank" class="btn btn-primary btn-sm mt-2">
+                    <i class="fas fa-directions"></i> Get Directions
+                </a>
+            </div>
+        `);
+
+        // Add click event to open popup
+        marker.on('click', function() {
+            this.openPopup();
+        });
+
+        // Disable scroll wheel zoom by default (enable on click)
+        map.scrollWheelZoom.disable();
+        
+        // Enable scroll wheel zoom when map is clicked
+        map.on('click', function() {
+            map.scrollWheelZoom.enable();
+        });
+        
+        // Disable scroll wheel zoom when mouse leaves map
+        map.on('mouseout', function() {
+            map.scrollWheelZoom.disable();
+        });
+
+        // Add a scale control
+        L.control.scale().addTo(map);
+
+        // Add fullscreen-like behavior on double click
+        map.on('dblclick', function() {
+            if (map.getContainer().requestFullscreen) {
+                map.getContainer().requestFullscreen();
+            }
+        });
+
+    {% endif %}
+});
+</script>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Edit {{ authority.name }} | MyCure Admin{% endblock %}
+{% block title %}Edit {{ authority.name }} | MyCure360 Admin{% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -212,16 +212,53 @@
                         
                         <div class="row mb-4">
                             <div class="col-12">
+                                <h5 class="text-primary mb-3">Operating Hours</h5>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.opening_time.id_for_label }}" class="form-label">Opening Time</label>
+                                {{ form.opening_time }}
+                                {% if form.opening_time.errors %}
+                                <div class="text-danger small mt-1">{{ form.opening_time.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Opening time (24-hour format)</div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.closing_time.id_for_label }}" class="form-label">Closing Time</label>
+                                {{ form.closing_time }}
+                                {% if form.closing_time.errors %}
+                                <div class="text-danger small mt-1">{{ form.closing_time.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Closing time (24-hour format)</div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check mt-4">
+                                    {{ form.open_on_weekends }}
+                                    <label class="form-check-label" for="{{ form.open_on_weekends.id_for_label }}">
+                                        Open on Weekends
+                                    </label>
+                                    {% if form.open_on_weekends.errors %}
+                                    <div class="text-danger small mt-1">{{ form.open_on_weekends.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-text">Check if open on weekends</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
                                 <h5 class="text-primary mb-3">Account Information</h5>
                             </div>
                             
                             <div class="col-12 mb-3">
-                                <label for="{{ form.user.id_for_label }}" class="form-label">Owner Account <span class="text-danger">*</span></label>
+                                <label for="{{ form.user.id_for_label }}" class="form-label">Owner Account</label>
                                 {{ form.user }}
                                 {% if form.user.errors %}
                                 <div class="text-danger small mt-1">{{ form.user.errors }}</div>
                                 {% endif %}
-                                <div class="form-text">Select the user who will manage this authority</div>
+                                <div class="form-text">Select the user who will manage this authority (optional)</div>
                             </div>
                         </div>
                         
@@ -238,7 +275,6 @@
     </div>
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script>
     $(document).ready(function() {
@@ -246,7 +282,7 @@
         if ($.fn.select2) {
             $('#id_user').select2({
                 placeholder: "Select a user",
-                allowClear: false,
+                allowClear: true,
                 width: '100%'
             });
         }

@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Add New Authority | MyCure Admin{% endblock %}
+
+{% block title %}Add New Authority | MyCure360 Admin{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -92,6 +94,42 @@
                             {{ form.is_verified }}
                             <label for="id_is_verified" class="form-check-label">Mark as Verified</label>
                             <div class="form-text">Check this box to immediately verify this authority.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Operating Hours -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4 class="card-title mb-3">Operating Hours</h4>
+                    </div>
+                    
+                    <!-- Opening Time -->
+                    <div class="col-md-4 mb-3">
+                        <label for="id_opening_time" class="form-label">Opening Time <span class="text-danger">*</span></label>
+                        {{ form.opening_time }}
+                        {% if form.opening_time.errors %}
+                        <div class="invalid-feedback d-block">{{ form.opening_time.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">{{ form.opening_time.help_text }}</div>
+                    </div>
+                    
+                    <!-- Closing Time -->
+                    <div class="col-md-4 mb-3">
+                        <label for="id_closing_time" class="form-label">Closing Time <span class="text-danger">*</span></label>
+                        {{ form.closing_time }}
+                        {% if form.closing_time.errors %}
+                        <div class="invalid-feedback d-block">{{ form.closing_time.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">{{ form.closing_time.help_text }}</div>
+                    </div>
+                    
+                    <!-- Open on Weekends -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check mt-4">
+                            {{ form.open_on_weekends }}
+                            <label for="id_open_on_weekends" class="form-check-label">Open on Weekends</label>
+                            <div class="form-text">{{ form.open_on_weekends.help_text }}</div>
                         </div>
                     </div>
                 </div>
@@ -267,6 +305,7 @@
     </div>
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <script>
     $(document).ready(function() {
@@ -297,6 +336,28 @@
                 width: '100%'
             });
         }
+        
+        // Time validation
+        $('#id_opening_time, #id_closing_time').change(function() {
+            var openingTime = $('#id_opening_time').val();
+            var closingTime = $('#id_closing_time').val();
+            
+            if (openingTime && closingTime) {
+                // Convert to comparable format
+                var openingDate = new Date('2000-01-01 ' + openingTime);
+                var closingDate = new Date('2000-01-01 ' + closingTime);
+                
+                if (closingDate <= openingDate) {
+                    $('#id_closing_time').addClass('is-invalid');
+                    if (!$('#id_closing_time').next('.invalid-feedback').length) {
+                        $('#id_closing_time').after('<div class="invalid-feedback d-block">Closing time must be after opening time.</div>');
+                    }
+                } else {
+                    $('#id_closing_time').removeClass('is-invalid');
+                    $('#id_closing_time').next('.invalid-feedback').remove();
+                }
+            }
+        });
         
         // Form validation
         (function () {
@@ -335,6 +396,22 @@
                             $('#id_password').addClass('is-invalid');
                             $('#id_password').next('.invalid-feedback').text('Password must be at least 8 characters long.');
                             isValid = false;
+                        }
+                    }
+                    
+                    // Validate time fields
+                    var openingTime = $('#id_opening_time').val();
+                    var closingTime = $('#id_closing_time').val();
+                    
+                    if (openingTime && closingTime) {
+                        var openingDate = new Date('2000-01-01 ' + openingTime);
+                        var closingDate = new Date('2000-01-01 ' + closingTime);
+                        
+                        if (closingDate <= openingDate) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            isValid = false;
+                            $('#id_closing_time').addClass('is-invalid');
                         }
                     }
                     

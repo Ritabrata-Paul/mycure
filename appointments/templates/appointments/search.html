@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Search for Healthcare Services{% endblock %}
+
 {% block extra_css %}
 <style>
   /* Custom search page styles */
@@ -18,18 +20,15 @@
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   }
-
   .search-title {
     color: #fff;
     margin-bottom: 20px;
     font-weight: 700;
   }
-
   .search-subtitle {
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 30px;
   }
-
   .form-control {
     height: 50px;
     border-radius: 8px;
@@ -37,22 +36,18 @@
     border: 1px solid #e2e8f0;
     padding-left: 15px;
   }
-
   .form-control:focus {
     border-color: #3e64ff;
     box-shadow: 0 0 0 0.2rem rgba(62, 100, 255, 0.25);
   }
-
   .search-btn {
     height: 50px;
     border-radius: 8px;
     font-weight: 600;
   }
-
   .search-icon {
     font-size: 1.2rem;
   }
-
   .result-count {
     font-size: 1.1rem;
     font-weight: 500;
@@ -60,17 +55,14 @@
     padding-bottom: 15px;
     border-bottom: 1px solid #e2e8f0;
   }
-
   .result-card {
     transition: all 0.3s ease;
     border: none;
   }
-
   .result-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
   }
-
   .result-img-container {
     display: flex;
     justify-content: center;
@@ -79,46 +71,47 @@
     background-color: #f8f9fa;
     border-radius: 8px 0 0 8px;
   }
-
   .result-info {
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
   }
-
   .result-info i {
     width: 20px;
     text-align: center;
   }
-
   .result-title {
     font-weight: 600;
     color: #1e3a8a;
     margin-bottom: 8px;
   }
-
+  .result-title a {
+    color: #1e3a8a;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .result-title a:hover {
+    color: #3e64ff;
+    text-decoration: underline;
+  }
   .result-description {
     color: #64748b;
     font-size: 0.9rem;
     margin-bottom: 15px;
   }
-
   .result-badge {
     padding: 5px 10px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 500;
   }
-
   .verified-badge {
     background-color: rgba(16, 185, 129, 0.1);
     color: #10b981;
   }
-
   .appointment-badge {
     background-color: rgba(14, 165, 233, 0.1);
     color: #0ea5e9;
   }
-
   .view-details-btn {
     padding: 8px 16px;
     border-radius: 6px;
@@ -126,14 +119,12 @@
     font-weight: 500;
     transition: all 0.3s ease;
   }
-
   .view-details-btn:hover {
     background-color: #3e64ff;
     border-color: #3e64ff;
     color: white;
     transform: translateY(-2px);
   }
-
   .no-results {
     background-color: rgba(14, 165, 233, 0.1);
     border-left: 4px solid #0ea5e9;
@@ -141,7 +132,16 @@
     border-radius: 8px;
     font-size: 1rem;
   }
-
+  /* Authority name hover effect */
+  .authority-name-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .authority-name-link:hover {
+    color: #3e64ff;
+    text-decoration: underline;
+  }
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .search-hero {
@@ -159,6 +159,7 @@
   }
 </style>
 {% endblock %}
+
 {% block content %}
 <!-- Hero Section with Search Form -->
 <section class="search-hero">
@@ -239,7 +240,9 @@
                 </div>
                 <div class="col-md-8">
                   <div class="card-body p-4">
-                    <h5 class="result-title">{{ authority.name }}</h5>
+                    <h5 class="result-title">
+                      <a href="{% url 'authority_detail' authority.id %}" class="authority-name-link">{{ authority.name }}</a>
+                    </h5>
                     <p class="result-info mb-2">
                       <i class="fas fa-map-marker-alt text-primary"></i> 
                       {{ authority.city }}, {{ authority.state }}

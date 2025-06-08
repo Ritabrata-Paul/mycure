@@ -1,7 +1,28 @@
+<!-- Header with contact info -->
+<div class="header-gradient text-white py-2">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <small>
+                    <i class="fas fa-envelope me-2"></i>
+                    <a href="mailto:mycure.360@aalho.com" class="text-white text-decoration-none">mycure.360@aalho.com</a>
+                </small>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <small>
+                    <i class="fas fa-phone me-2"></i>
+                    <a href="tel:+1234567890" class="text-white text-decoration-none">(123) 456-7890</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm w-100">
     <div class="container">
         <a class="navbar-brand" href="{% url 'home' %}">
-            <img src="/static/images/logo.png" alt="MyCure Logo" height="50">
+            <img src="/static/images/logo.png" alt="MyCure360 Logo" height="50">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -17,11 +38,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'contact' %}">Contact</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'core:terms' %}">Terms & Conditions</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'core:about' %}">About</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        About
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="aboutDropdown">
+                        <li><a class="dropdown-item" href="{% url 'core:about' %}">About Us</a></li>
+                        <li><a class="dropdown-item" href="{% url 'core:terms' %}">Terms & Conditions</a></li>
+                    </ul>
                 </li>
             </ul>
             <ul class="navbar-nav">

@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 mb-4">
-                <h5>MyCure</h5>
+                <h5>MyCure360</h5>
                 <p>Your trusted healthcare appointment booking platform. Find and book appointments with verified healthcare providers easily.</p>
                 
             </div>
@@ -22,12 +22,20 @@
                 </ul>
             </div>
             <div class="col-md-2 mb-4">
-                <h5>Social</h5>
+                <h5>Follow Us</h5>
                 <div class="d-flex gap-3">
-                    <a href="#" class="text-white"><i class="fab fa-facebook-f fa-lg"></i></a>
-                    <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
-                    <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
-                    <a href="#" class="text-white"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                    <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" class="text-white social-link" title="Follow us on Facebook">
+                        <i class="fab fa-facebook-f fa-lg"></i>
+                    </a>
+                    <a href="https://www.x.com/" target="_blank" rel="noopener noreferrer" class="text-white social-link" title="Follow us on X (Twitter)">
+                        <i class="fa-brands fa-x-twitter"></i>
+                    </a>
+                    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="text-white social-link" title="Follow us on Instagram">
+                        <i class="fab fa-instagram fa-lg"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" class="text-white social-link" title="Connect with us on LinkedIn">
+                        <i class="fab fa-linkedin-in fa-lg"></i>
+                    </a>
                 </div>
             </div>
             <div class="col-md-3 mb-4">
@@ -42,8 +50,45 @@
         <hr class="my-3">
         <div class="row">
             <div class="col-12 text-center">
-                <p class="mb-0">&copy; {% now "Y" %} MyCure. All rights reserved.</p>
+                <p class="mb-0">&copy; {% now "Y" %} MyCure360. All rights reserved.</p>
             </div>
         </div>
     </div>
 </footer>
+
+<style>
+/* Social media links hover effects */
+.social-link {
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.social-link:hover {
+    color: #007bff !important;
+    transform: translateY(-2px);
+}
+
+/* Individual social media brand colors on hover */
+.social-link:hover .fa-facebook-f {
+    color: #1877f2 !important;
+}
+
+.social-link:hover .fa-twitter {
+    color: #1da1f2 !important;
+}
+
+.social-link:hover .fa-instagram {
+    color: #e4405f !important;
+}
+
+.social-link:hover .fa-linkedin-in {
+    color: #0077b5 !important;
+}
+
+/* Dark mode adjustment for X (Twitter) */
+@media (prefers-color-scheme: dark) {
+    .social-link:hover .fa-x-twitter {
+        color: #ffffff !important;
+    }
+}
+</style>

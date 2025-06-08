@@ -3,112 +3,360 @@
 
 {% block title %}Add New Time Slot - {{ authority.name }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .select-dropdown {
+        position: relative;
+    }
+    
+    .select-dropdown .dropdown-toggle {
+        width: 100%;
+        text-align: left;
+        background: white;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        color: #495057;
+    }
+    
+    .select-dropdown .dropdown-toggle:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .checkbox-dropdown-content {
+        max-height: 250px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background: white;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+    }
+    
+    .checkbox-dropdown-item {
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.25rem;
+        border-radius: 0.25rem;
+        transition: background-color 0.15s ease-in-out;
+    }
+    
+    .checkbox-dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .checkbox-dropdown-item input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
+    
+    .selected-count {
+        background: #e7f3ff;
+        color: #0066cc;
+        border-radius: 1rem;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #0d6efd;
+    }
+    
+    .form-section h6 {
+        color: #0d6efd;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .time-input-group {
+        position: relative;
+    }
+    
+    .time-input-group::before {
+        content: '\f017';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 5;
+    }
+    
+    .time-input-group input {
+        padding-left: 2.5rem;
+    }
+    
+    .capacity-info {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+    }
+    
+    .capacity-info small {
+        color: #856404;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container my-4">
     <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'authority_dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'manage_slots' %}">Time Slots</a></li>
+        <div class="col-lg-10 mx-auto">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light rounded p-3">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'authority_dashboard' %}" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'manage_slots' %}" class="text-decoration-none">
+                            <i class="fas fa-clock me-1"></i>Time Slots
+                        </a>
+                    </li>
                     <li class="breadcrumb-item active" aria-current="page">Add New Slot</li>
                 </ol>
             </nav>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Add New Time Slot</h4>
+            <!-- Main Card -->
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-plus-circle me-3 fs-4"></i>
+                        <div>
+                            <h4 class="mb-0">Create New Time Slot</h4>
+                            <small class="opacity-75">Set up availability for your services</small>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
+
+                <div class="card-body p-4">
+                    <!-- Messages -->
                     {% if messages %}
                         {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                                <i class="fas fa-{% if message.tags == 'error' %}exclamation-triangle{% else %}check-circle{% endif %} me-2"></i>
                                 {{ message }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         {% endfor %}
                     {% endif %}
 
-                    <form method="post" novalidate>
+                    <form method="post" novalidate id="slotForm">
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label for="{{ form.service.id_for_label }}" class="form-label">Service</label>
-                            {{ form.service }}
-                            {% if form.service.errors %}
-                                <div class="text-danger">
-                                    {{ form.service.errors }}
+                        <!-- Services Selection Section -->
+                        <div class="form-section">
+                            <h6><i class="fas fa-medical-bag me-2"></i>Services Selection</h6>
+                            {% if form.services.errors %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    {{ form.services.errors }}
                                 </div>
                             {% endif %}
-                            <div class="form-text">Select which service this time slot is for</div>
+                            
+                            <div class="select-dropdown">
+                                <button type="button" class="dropdown-toggle" id="servicesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span id="servicesPlaceholder">Select Services *</span>
+                                    <span class="selected-count ms-2" id="servicesCount" style="display: none;">0 selected</span>
+                                </button>
+                                <div class="dropdown-menu checkbox-dropdown-content w-100" aria-labelledby="servicesDropdown">
+                                    <div class="search-box mb-2">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Search services..." id="servicesSearch">
+                                    </div>
+                                    <div id="servicesCheckboxes">
+                                        {% if form.services.field.queryset %}
+                                            {% for choice in form.services %}
+                                                <div class="checkbox-dropdown-item service-item">
+                                                    {{ choice.tag|safe }}
+                                                    <label class="form-check-label ms-2" for="{{ choice.id_for_label }}">
+                                                        <strong>{{ choice.choice_label }}</strong>
+                                                        {% if choice.choice_value.description %}
+                                                            <br><small class="text-muted">{{ choice.choice_value.description|truncatewords:10 }}</small>
+                                                        {% endif %}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="text-center text-muted py-3">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                No services available. Please add services first.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Select one or more services for this time slot
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.doctor.id_for_label }}" class="form-label">Doctor (Optional)</label>
-                            {{ form.doctor }}
-                            {% if form.doctor.errors %}
-                                <div class="text-danger">
-                                    {{ form.doctor.errors }}
+                        <!-- Doctors Selection Section -->
+                        <div class="form-section">
+                            <h6><i class="fas fa-user-md me-2"></i>Doctors Assignment (Optional)</h6>
+                            {% if form.doctors.errors %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    {{ form.doctors.errors }}
                                 </div>
                             {% endif %}
-                            <div class="form-text">Assign a doctor to this time slot if applicable</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="{{ form.weekday.id_for_label }}" class="form-label">Day of Week</label>
-                            {{ form.weekday }}
-                            {% if form.weekday.errors %}
-                                <div class="text-danger">
-                                    {{ form.weekday.errors }}
+                            
+                            <div class="select-dropdown">
+                                <button type="button" class="dropdown-toggle" id="doctorsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span id="doctorsPlaceholder">Select Doctors (Optional)</span>
+                                    <span class="selected-count ms-2" id="doctorsCount" style="display: none;">0 selected</span>
+                                </button>
+                                <div class="dropdown-menu checkbox-dropdown-content w-100" aria-labelledby="doctorsDropdown">
+                                    <div class="search-box mb-2">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Search doctors..." id="doctorsSearch">
+                                    </div>
+                                    <div id="doctorsCheckboxes">
+                                        {% if form.doctors.field.queryset %}
+                                            {% for choice in form.doctors %}
+                                                <div class="checkbox-dropdown-item doctor-item">
+                                                    {{ choice.tag|safe }}
+                                                    <label class="form-check-label ms-2" for="{{ choice.id_for_label }}">
+                                                        <strong>{{ choice.choice_label }}</strong>
+                                                        {% if choice.choice_value.specialization %}
+                                                            <br><small class="text-muted">{{ choice.choice_value.specialization }}</small>
+                                                        {% endif %}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="text-center text-muted py-3">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                No doctors available. You can add doctors later.
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            {% endif %}
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Assign specific doctors to this time slot, or leave empty for general availability
+                            </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.start_time.id_for_label }}" class="form-label">Start Time</label>
-                                    {{ form.start_time }}
+                        <!-- Schedule Section -->
+                        <div class="form-section">
+                            <h6><i class="fas fa-calendar-alt me-2"></i>Schedule Configuration</h6>
+                            
+                            <div class="row">
+                                <!-- Day Selection -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.weekday.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-day me-1"></i>Day of Week
+                                    </label>
+                                    {{ form.weekday }}
+                                    {% if form.weekday.errors %}
+                                        <div class="text-danger mt-1">
+                                            <small>{{ form.weekday.errors }}</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Start Time -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.start_time.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-clock me-1"></i>Start Time
+                                    </label>
+                                    <div class="time-input-group">
+                                        {{ form.start_time }}
+                                    </div>
                                     {% if form.start_time.errors %}
-                                        <div class="text-danger">
-                                            {{ form.start_time.errors }}
+                                        <div class="text-danger mt-1">
+                                            <small>{{ form.start_time.errors }}</small>
                                         </div>
                                     {% endif %}
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.end_time.id_for_label }}" class="form-label">End Time</label>
-                                    {{ form.end_time }}
+
+                                <!-- End Time -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.end_time.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-clock me-1"></i>End Time
+                                    </label>
+                                    <div class="time-input-group">
+                                        {{ form.end_time }}
+                                    </div>
                                     {% if form.end_time.errors %}
-                                        <div class="text-danger">
-                                            {{ form.end_time.errors }}
+                                        <div class="text-danger mt-1">
+                                            <small>{{ form.end_time.errors }}</small>
                                         </div>
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.capacity.id_for_label }}" class="form-label">Capacity</label>
-                            {{ form.capacity }}
-                            {% if form.capacity.errors %}
-                                <div class="text-danger">
-                                    {{ form.capacity.errors }}
+                        <!-- Capacity and Status Section -->
+                        <div class="form-section">
+                            <h6><i class="fas fa-users me-2"></i>Capacity & Status</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.capacity.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-users me-1"></i>Capacity
+                                    </label>
+                                    {{ form.capacity }}
+                                    {% if form.capacity.errors %}
+                                        <div class="text-danger mt-1">
+                                            <small>{{ form.capacity.errors }}</small>
+                                        </div>
+                                    {% endif %}
+                                    <div class="capacity-info">
+                                        <small>
+                                            <i class="fas fa-lightbulb me-1"></i>
+                                            Maximum number of appointments that can be booked simultaneously
+                                        </small>
+                                    </div>
                                 </div>
-                            {% endif %}
-                            <div class="form-text">Maximum number of appointments that can be booked in this time slot</div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-toggle-on me-1"></i>Status
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        {{ form.is_active }}
+                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                            Active Time Slot
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Inactive slots won't be available for booking
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3 form-check">
-                            {{ form.is_active }}
-                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active</label>
-                            <div class="form-text">Uncheck to temporarily disable this time slot</div>
-                        </div>
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'manage_slots' %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Create Time Slot</button>
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <a href="{% url 'manage_slots' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                <i class="fas fa-save me-2"></i>Create Time Slot
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -116,22 +364,100 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    // Add any JavaScript needed for dynamic form behavior
-    document.addEventListener('DOMContentLoaded', function() {
-        // Example: Service selection might filter available doctors
-        const serviceSelect = document.querySelector('#{{ form.service.id_for_label }}');
-        const doctorSelect = document.querySelector('#{{ form.doctor.id_for_label }}');
+document.addEventListener('DOMContentLoaded', function() {
+    // Services dropdown functionality
+    const servicesCheckboxes = document.querySelectorAll('#servicesCheckboxes input[type="checkbox"]');
+    const servicesPlaceholder = document.getElementById('servicesPlaceholder');
+    const servicesCount = document.getElementById('servicesCount');
+    const servicesSearch = document.getElementById('servicesSearch');
+    
+    // Doctors dropdown functionality
+    const doctorsCheckboxes = document.querySelectorAll('#doctorsCheckboxes input[type="checkbox"]');
+    const doctorsPlaceholder = document.getElementById('doctorsPlaceholder');
+    const doctorsCount = document.getElementById('doctorsCount');
+    const doctorsSearch = document.getElementById('doctorsSearch');
+    
+    // Update services display
+    function updateServicesDisplay() {
+        const selectedServices = Array.from(servicesCheckboxes).filter(cb => cb.checked);
+        const count = selectedServices.length;
         
-        if (serviceSelect && doctorSelect) {
-            serviceSelect.addEventListener('change', function() {
-                // You could implement an AJAX call here to update the doctor options
-                // based on the selected service
-            });
+        if (count === 0) {
+            servicesPlaceholder.textContent = 'Select Services *';
+            servicesCount.style.display = 'none';
+        } else {
+            servicesPlaceholder.textContent = `${count} service${count > 1 ? 's' : ''} selected`;
+            servicesCount.textContent = `${count} selected`;
+            servicesCount.style.display = 'inline';
         }
+    }
+    
+    // Update doctors display
+    function updateDoctorsDisplay() {
+        const selectedDoctors = Array.from(doctorsCheckboxes).filter(cb => cb.checked);
+        const count = selectedDoctors.length;
+        
+        if (count === 0) {
+            doctorsPlaceholder.textContent = 'Select Doctors (Optional)';
+            doctorsCount.style.display = 'none';
+        } else {
+            doctorsPlaceholder.textContent = `${count} doctor${count > 1 ? 's' : ''} selected`;
+            doctorsCount.textContent = `${count} selected`;
+            doctorsCount.style.display = 'inline';
+        }
+    }
+    
+    // Search functionality for services
+    servicesSearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const serviceItems = document.querySelectorAll('.service-item');
+        
+        serviceItems.forEach(item => {
+            const label = item.querySelector('label').textContent.toLowerCase();
+            if (label.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     });
+    
+    // Search functionality for doctors
+    doctorsSearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const doctorItems = document.querySelectorAll('.doctor-item');
+        
+        doctorItems.forEach(item => {
+            const label = item.querySelector('label').textContent.toLowerCase();
+            if (label.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+    
+    // Add event listeners
+    servicesCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateServicesDisplay);
+    });
+    
+    doctorsCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateDoctorsDisplay);
+    });
+    
+    // Initialize displays
+    updateServicesDisplay();
+    updateDoctorsDisplay();
+    
+    // Prevent dropdown from closing when clicking inside
+    document.querySelectorAll('.checkbox-dropdown-content').forEach(dropdown => {
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+});
 </script>
 {% endblock %}

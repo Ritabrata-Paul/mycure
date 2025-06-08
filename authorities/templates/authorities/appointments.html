@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Appointments Management - MyCure{% endblock %}
+{% block title %}Appointments Management - MyCure360{% endblock %}
 {% block content %}
 <div class="container py-4">
     <h1 class="h2">Manage Appointments</h1>
@@ -12,7 +12,7 @@
             <div class="card h-100 border-warning">
                 <div class="card-body text-center">
                     <h5 class="card-title">Pending</h5>
-                    <h2 class="display-4">{{ pending_appointments|length }}</h2>
+                    <h2 class="display-4">{{ total_pending }}</h2>
                     <p class="text-muted">Awaiting response</p>
                 </div>
             </div>
@@ -21,7 +21,7 @@
             <div class="card h-100 border-success">
                 <div class="card-body text-center">
                     <h5 class="card-title">Upcoming</h5>
-                    <h2 class="display-4">{{ upcoming_appointments|length }}</h2>
+                    <h2 class="display-4">{{ total_upcoming }}</h2>
                     <p class="text-muted">Approved appointments</p>
                 </div>
             </div>
@@ -30,7 +30,7 @@
             <div class="card h-100 border-secondary">
                 <div class="card-body text-center">
                     <h5 class="card-title">Past</h5>
-                    <h2 class="display-4">{{ past_appointments|length }}</h2>
+                    <h2 class="display-4">{{ total_past }}</h2>
                     <p class="text-muted">Completed appointments</p>
                 </div>
             </div>
@@ -39,7 +39,7 @@
             <div class="card h-100 border-info">
                 <div class="card-body text-center">
                     <h5 class="card-title">Total</h5>
-                    <h2 class="display-4">{{ pending_appointments|length|add:upcoming_appointments|length|add:past_appointments|length }}</h2>
+                    <h2 class="display-4">{{ total_appointments }}</h2>
                     <p class="text-muted">All appointments</p>
                 </div>
             </div>
@@ -53,27 +53,36 @@
         </div>
         <div class="card-body">
             <form method="get" class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="service" class="form-label">Service</label>
                     <select name="service" id="service" class="form-select">
                         <option value="">All Services</option>
-                        {% for service in authority.services.all %}
-                        <option value="{{ service.id }}" {% if request.GET.service == service.id|stringformat:"s" %}selected{% endif %}>{{ service.name }}</option>
+                        {% for service in services %}
+                        <option value="{{ service.id }}" {% if current_filters.service == service.id|stringformat:"s" %}selected{% endif %}>{{ service.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="doctor" class="form-label">Doctor</label>
                     <select name="doctor" id="doctor" class="form-select">
                         <option value="">All Doctors</option>
-                        {% for doctor in authority.doctors.all %}
-                        <option value="{{ doctor.id }}" {% if request.GET.doctor == doctor.id|stringformat:"s" %}selected{% endif %}>{{ doctor.name }}</option>
+                        {% for doctor in doctors %}
+                        <option value="{{ doctor.id }}" {% if current_filters.doctor == doctor.id|stringformat:"s" %}selected{% endif %}>{{ doctor.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">All Status</option>
+                        {% for status_code, status_name in status_choices %}
+                        <option value="{{ status_code }}" {% if current_filters.status == status_code %}selected{% endif %}>{{ status_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <label for="date" class="form-label">Date</label>
-                    <input type="date" name="date" id="date" class="form-control" value="{{ request.GET.date }}">
+                    <input type="date" name="date" id="date" class="form-control" value="{{ current_filters.date }}">
                 </div>
                 <div class="col-12 text-end">
                     <button type="submit" class="btn btn-primary">
@@ -128,6 +137,7 @@
                                     <th>Service</th>
                                     <th>Doctor</th>
                                     <th>Date & Time</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -138,7 +148,8 @@
                                     <td>{{ appointment.user.get_full_name }}</td>
                                     <td>{{ appointment.service.name }}</td>
                                     <td>{% if appointment.doctor %}{{ appointment.doctor.name }}{% else %}Not Assigned{% endif %}</td>
-                                    <td>{{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time }}</td>
+                                    <td>{{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"g:i A" }}</td>
+                                    <td><span class="badge bg-warning text-dark">{{ appointment.get_status_display }}</span></td>
                                     <td>
                                         <a href="{% url 'approve_appointment' appointment.id %}" class="btn btn-sm btn-success me-1">
                                             <i class="bi bi-check-circle"></i> Approve
@@ -181,6 +192,7 @@
                                     <th>Service</th>
                                     <th>Doctor</th>
                                     <th>Date & Time</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -191,7 +203,8 @@
                                     <td>{{ appointment.user.get_full_name }}</td>
                                     <td>{{ appointment.service.name }}</td>
                                     <td>{% if appointment.doctor %}{{ appointment.doctor.name }}{% else %}Not Assigned{% endif %}</td>
-                                    <td>{{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time }}</td>
+                                    <td>{{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"g:i A" }}</td>
+                                    <td><span class="badge bg-success">{{ appointment.get_status_display }}</span></td>
                                     <td>
                                         <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-sm btn-info">
                                             <i class="bi bi-eye"></i> Details
@@ -239,14 +252,18 @@
                                     <td>{{ appointment.user.get_full_name }}</td>
                                     <td>{{ appointment.service.name }}</td>
                                     <td>{% if appointment.doctor %}{{ appointment.doctor.name }}{% else %}Not Assigned{% endif %}</td>
-                                    <td>{{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time }}</td>
+                                    <td>{{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"g:i A" }}</td>
                                     <td>
-                                        {% if appointment.status == 'APPROVED' %}
-                                        <span class="badge bg-success">Completed</span>
+                                        {% if appointment.status == 'COMPLETED' %}
+                                        <span class="badge bg-info">Completed</span>
                                         {% elif appointment.status == 'REJECTED' %}
                                         <span class="badge bg-danger">Rejected</span>
                                         {% elif appointment.status == 'CANCELLED' %}
                                         <span class="badge bg-secondary">Cancelled</span>
+                                        {% elif appointment.status == 'APPROVED' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% else %}
+                                        <span class="badge bg-primary">{{ appointment.get_status_display }}</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -269,4 +286,18 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form when filters change
+    const filterForm = document.querySelector('form');
+    const filterSelects = filterForm.querySelectorAll('select, input[type="date"]');
+    
+    filterSelects.forEach(function(select) {
+        select.addEventListener('change', function() {
+            filterForm.submit();
+        });
+    });
+});
+</script>
 {% endblock %}

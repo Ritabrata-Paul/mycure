@@ -64,6 +64,24 @@ def manage_doctors_view(request, authority_id):
 
 @login_required
 @user_passes_test(is_admin)
+def add_user_view(request):
+    """Add new user"""
+    if request.method == 'POST':
+        form = AdminCreateUserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, f"User {user.email} has been created successfully!")
+            return redirect('user_detail', user_id=user.id)
+    else:
+        form = AdminCreateUserForm()
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'adminpanel/add_user.html', context)
+
+@login_required
+@user_passes_test(is_admin)
 def manage_users_view(request):
     """View for managing users"""
     users = User.objects.all().order_by('-date_joined')
@@ -99,13 +117,13 @@ def manage_users_view(request):
 @login_required
 @user_passes_test(is_admin)
 def user_detail_view(request, user_id):
-    """View user details"""
+    """View user details with comprehensive activity tracking"""
     user = get_object_or_404(User, id=user_id)
     
     # Get user's appointments if they are a customer
     appointments = None
     if user.user_type == 'CUSTOMER':
-        appointments = Appointment.objects.filter(user=user).order_by('-appointment_date')
+        appointments = Appointment.objects.filter(user=user).order_by('-created_at')[:10]  # Get more for activity log
     
     # Get authority details if user is an authority
     authority = None
@@ -115,10 +133,21 @@ def user_detail_view(request, user_id):
         except Authority.DoesNotExist:
             pass
     
+    # Prepare activity data for the template
+    activity_data = {
+        'account_created': user.date_joined,
+        'last_login': user.last_login,
+        'appointments_count': appointments.count() if appointments else 0,
+        'recent_appointments': appointments[:5] if appointments else None,
+        'authority_status': authority.is_verified if authority else None,
+        'authority_created': authority.created_at if authority else None,
+    }
+    
     context = {
         'user_detail': user,
         'appointments': appointments,
         'authority': authority,
+        'activity_data': activity_data,
     }
     return render(request, 'adminpanel/user_detail.html', context)
 
@@ -128,9 +157,19 @@ def edit_user_view(request, user_id):
     """Edit user"""
     user = get_object_or_404(User, id=user_id)
     
+    # Prevent editing other admin users
+    if user.user_type == 'ADMIN' and user != request.user:
+        messages.error(request, "You cannot edit other admin users.")
+        return redirect('user_detail', user_id=user.id)
+    
     if request.method == 'POST':
         form = UserForm(request.POST, instance=user)
         if form.is_valid():
+            # Additional validation for admin users
+            if user.user_type == 'ADMIN' and form.cleaned_data['user_type'] != 'ADMIN':
+                messages.error(request, "Admin users cannot be changed to other user types.")
+                return redirect('edit_user', user_id=user.id)
+            
             form.save()
             messages.success(request, f"User {user.email} has been updated successfully!")
             return redirect('user_detail', user_id=user.id)
@@ -142,6 +181,7 @@ def edit_user_view(request, user_id):
         'user_detail': user,
     }
     return render(request, 'adminpanel/edit_user.html', context)
+
 
 @login_required
 @user_passes_test(is_admin)
@@ -393,11 +433,53 @@ def all_appointments_view(request):
             authority__name__icontains=search_query
         )
     
-    # Get appointment counts by status for statistics
-    pending_count = Appointment.objects.filter(status='PENDING').count()
-    approved_count = Appointment.objects.filter(status='APPROVED').count()
-    completed_count = Appointment.objects.filter(status='COMPLETED').count()
-    cancelled_count = Appointment.objects.filter(status='CANCELLED').count()
+    # Get the filtered queryset for statistics
+    filtered_appointments = appointments
+    
+    # Get appointment counts by status for statistics (filtered)
+    pending_count = filtered_appointments.filter(status='PENDING').count()
+    approved_count = filtered_appointments.filter(status='APPROVED').count()
+    completed_count = filtered_appointments.filter(status='COMPLETED').count()
+    cancelled_count = filtered_appointments.filter(status='CANCELLED').count()
+    
+    # Get monthly data for the last 6 months (filtered)
+    from django.utils import timezone
+    from datetime import datetime, timedelta
+    from django.db.models import Count
+    from django.db.models.functions import TruncMonth
+    
+    # Calculate date 6 months ago
+    six_months_ago = timezone.now() - timedelta(days=180)
+    
+    # Get monthly appointment counts (filtered)
+    monthly_data = (
+        filtered_appointments
+        .filter(created_at__gte=six_months_ago)
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+    
+    # Create a list of the last 6 months with counts
+    monthly_appointments = []
+    current_date = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    for i in range(6):
+        month_date = current_date - timedelta(days=30*i)
+        month_count = 0
+        
+        # Find count for this month in the data
+        for data in monthly_data:
+            if (data['month'].year == month_date.year and 
+                data['month'].month == month_date.month):
+                month_count = data['count']
+                break
+        
+        monthly_appointments.insert(0, {
+            'month': month_date.strftime('%b'),
+            'count': month_count
+        })
     
     # Pagination
     paginator = Paginator(appointments, 15)  # Show 15 appointments per page
@@ -417,9 +499,11 @@ def all_appointments_view(request):
         'approved_count': approved_count,
         'completed_count': completed_count,
         'cancelled_count': cancelled_count,
+        'monthly_appointments': monthly_appointments,
     }
     
     return render(request, 'adminpanel/all_appointments.html', context)
+
 
 @login_required
 @user_passes_test(is_admin)

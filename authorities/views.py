@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.db.models import Count
 from django.http import JsonResponse
 from django.utils.formats import date_format
+from django.db import models
 
 from .models import Authority, Service, Doctor, TimeSlot
 from appointments.models import Appointment
@@ -81,30 +82,96 @@ def appointment_detail_view(request, appointment_id):
 @login_required
 @authority_required
 def authority_appointments_view(request):
-    """View authority's appointments"""
+    """View authority's appointments with filtering"""
     authority = request.user.authority_profile
     
-    pending_appointments = Appointment.objects.filter(
-        authority=authority,
+    # Get all appointments for this authority
+    all_appointments = Appointment.objects.filter(authority=authority)
+    
+    # Apply filters
+    service_filter = request.GET.get('service')
+    doctor_filter = request.GET.get('doctor')
+    date_filter = request.GET.get('date')
+    status_filter = request.GET.get('status')
+    
+    # Start with all appointments
+    filtered_appointments = all_appointments
+    
+    # Apply service filter
+    if service_filter:
+        filtered_appointments = filtered_appointments.filter(service_id=service_filter)
+    
+    # Apply doctor filter
+    if doctor_filter:
+        filtered_appointments = filtered_appointments.filter(doctor_id=doctor_filter)
+    
+    # Apply date filter
+    if date_filter:
+        filtered_appointments = filtered_appointments.filter(appointment_date=date_filter)
+    
+    # Apply status filter
+    if status_filter:
+        filtered_appointments = filtered_appointments.filter(status=status_filter)
+    
+    # Separate appointments by status and date
+    pending_appointments = filtered_appointments.filter(
         status='PENDING'
     ).order_by('appointment_date', 'appointment_time')
     
-    upcoming_appointments = Appointment.objects.filter(
-        authority=authority,
+    # Upcoming appointments: approved and date >= today
+    upcoming_appointments = filtered_appointments.filter(
         status='APPROVED',
         appointment_date__gte=timezone.now().date()
     ).order_by('appointment_date', 'appointment_time')
     
-    past_appointments = Appointment.objects.filter(
-        authority=authority,
-        appointment_date__lt=timezone.now().date()
+    # Past appointments: any status and date < today, OR completed/rejected/cancelled regardless of date
+    past_appointments = filtered_appointments.filter(
+        models.Q(appointment_date__lt=timezone.now().date()) |
+        models.Q(status__in=['COMPLETED', 'REJECTED', 'CANCELLED'])
     ).order_by('-appointment_date', '-appointment_time')
+    
+    # Get total counts for stats (unfiltered)
+    total_pending = all_appointments.filter(status='PENDING').count()
+    total_upcoming = all_appointments.filter(
+        status='APPROVED',
+        appointment_date__gte=timezone.now().date()
+    ).count()
+    total_past = all_appointments.filter(
+        models.Q(appointment_date__lt=timezone.now().date()) |
+        models.Q(status__in=['COMPLETED', 'REJECTED', 'CANCELLED'])
+    ).count()
+    
+    # Get all services and doctors for filter dropdowns
+    services = Service.objects.filter(authority=authority, is_active=True)
+    doctors = Doctor.objects.filter(authority=authority, is_active=True)
+    
+    # Status choices for filter
+    status_choices = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+        ('CANCELLED', 'Cancelled'),
+        ('COMPLETED', 'Completed'),
+    ]
     
     context = {
         'authority': authority,
         'pending_appointments': pending_appointments,
         'upcoming_appointments': upcoming_appointments,
         'past_appointments': past_appointments,
+        'total_pending': total_pending,
+        'total_upcoming': total_upcoming,
+        'total_past': total_past,
+        'total_appointments': total_pending + total_upcoming + total_past,
+        'services': services,
+        'doctors': doctors,
+        'status_choices': status_choices,
+        'current_filters': {
+            'service': service_filter,
+            'doctor': doctor_filter,
+            'date': date_filter,
+            'status': status_filter,
+        }
     }
     return render(request, 'authorities/appointments.html', context)
 
@@ -131,33 +198,48 @@ def reject_appointment_view(request, appointment_id):
     authority = request.user.authority_profile
     appointment = get_object_or_404(Appointment, id=appointment_id, authority=authority)
     
+    # Check if appointment can be rejected
     if appointment.status != 'PENDING':
-        messages.error(request, "This appointment cannot be rejected.")
+        messages.error(request, "This appointment cannot be rejected. Only pending appointments can be rejected.")
         return redirect('authority_appointments')
     
     if request.method == 'POST':
-        form = AppointmentResponseForm(request.POST)
-        if form.is_valid():
+        # Get the rejection reason directly from POST data
+        rejection_reason = request.POST.get('rejection_reason', '').strip()
+        
+        # Validate that rejection reason is provided
+        if not rejection_reason:
+            messages.error(request, "Please provide a reason for rejection.")
+            context = {
+                'appointment': appointment,
+                'authority': authority,
+                'form_error': 'Rejection reason is required.'
+            }
+            return render(request, 'authorities/reject_appointment.html', context)
+        
+        try:
+            # Update appointment status
             appointment.status = 'REJECTED'
-            appointment.rejection_reason = form.cleaned_data.get('rejection_reason')
+            appointment.rejection_reason = rejection_reason
             appointment.save()
             
-            # Free up the appointment slot
-            try:
-                appointment_slot = appointment.booked_slot
-                appointment_slot.is_available = True
-                appointment_slot.save()
-            except:
-                pass
+            # Free up the appointment slot if it exists
+            if hasattr(appointment, 'booked_slot') and appointment.booked_slot:
+                appointment.booked_slot.is_available = True
+                appointment.booked_slot.save()
             
-            messages.success(request, "Appointment has been rejected.")
+            messages.success(request, f"Appointment #{appointment.id} has been rejected successfully.")
             return redirect('authority_appointments')
-    else:
-        form = AppointmentResponseForm()
-    
+            
+        except Exception as e:
+            messages.error(request, f"An error occurred while rejecting the appointment: {str(e)}")
+            
+    # For GET request, display the form
+    form = AppointmentResponseForm()
     context = {
         'form': form,
         'appointment': appointment,
+        'authority': authority,
     }
     return render(request, 'authorities/reject_appointment.html', context)
 
@@ -168,9 +250,63 @@ def manage_services_view(request):
     authority = request.user.authority_profile
     services = Service.objects.filter(authority=authority)
     
+    # Apply filters
+    doctor_filter = request.GET.get('doctor')
+    status_filter = request.GET.get('status')
+    price_filter = request.GET.get('price')
+    sort_by = request.GET.get('sort', 'name')
+    
+    # Filter by doctor
+    if doctor_filter:
+        services = services.filter(doctor_id=doctor_filter)
+    
+    # Filter by status
+    if status_filter == 'active':
+        services = services.filter(is_active=True)
+    elif status_filter == 'inactive':
+        services = services.filter(is_active=False)
+    
+    # Filter by price range
+    if price_filter:
+        if price_filter == '0-100':
+            services = services.filter(price__lte=100)
+        elif price_filter == '101-500':
+            services = services.filter(price__gte=101, price__lte=500)
+        elif price_filter == '501-1000':
+            services = services.filter(price__gte=501, price__lte=1000)
+        elif price_filter == '1001+':
+            services = services.filter(price__gte=1001)
+    
+    # Apply sorting
+    if sort_by == 'name':
+        services = services.order_by('name')
+    elif sort_by == 'price':
+        services = services.order_by('price')
+    elif sort_by == '-price':
+        services = services.order_by('-price')
+    elif sort_by == 'duration':
+        services = services.order_by('duration_minutes')
+    elif sort_by == '-created_at':
+        services = services.order_by('-created_at')
+    else:
+        services = services.order_by('name')
+    
+    # Calculate statistics
+    all_services = Service.objects.filter(authority=authority)
+    active_count = all_services.filter(is_active=True).count()
+    inactive_count = all_services.filter(is_active=False).count()
+    
     context = {
         'authority': authority,
         'services': services,
+        'active_count': active_count,
+        'inactive_count': inactive_count,
+        'current_filters': {
+            'doctor': doctor_filter,
+            'status': status_filter,
+            'price': price_filter,
+            'sort': sort_by,
+        }
     }
     return render(request, 'authorities/services.html', context)
 
@@ -341,7 +477,11 @@ def change_doctor_status(request, doctor_id):
 def manage_slots_view(request):
     """Manage authority time slots"""
     authority = request.user.authority_profile
-    slots = TimeSlot.objects.filter(authority=authority)
+    # Show all slots (both active and inactive) that are not booked
+    slots = TimeSlot.objects.filter(
+        authority=authority,
+        is_booked=False
+    ).prefetch_related('services', 'doctors').order_by('weekday', 'start_time')
     
     context = {
         'authority': authority,
@@ -351,16 +491,41 @@ def manage_slots_view(request):
 
 @login_required
 @authority_required
+def change_slot_status(request, slot_id):
+    """Toggle slot's status between active and inactive."""
+    authority = request.user.authority_profile
+    slot = get_object_or_404(TimeSlot, id=slot_id, authority=authority)
+    
+    # Don't allow status change for booked slots
+    if slot.is_booked:
+        messages.error(request, "Cannot change status of a booked time slot.")
+        return redirect('manage_slots')
+    
+    # Toggle the slot's status
+    slot.is_active = not slot.is_active
+    slot.save()
+    
+    # Show success message
+    status = 'activated' if slot.is_active else 'deactivated'
+    messages.success(request, f"Time slot has been {status} successfully.")
+    return redirect('manage_slots')
+
+
+
+@login_required
+@authority_required
 def add_slot_view(request):
     """Add a new time slot"""
     authority = request.user.authority_profile
-    
     if request.method == 'POST':
         form = TimeSlotForm(authority, request.POST)
+        form.authority = authority  # Pass authority to form for validation
         if form.is_valid():
             slot = form.save(commit=False)
             slot.authority = authority
             slot.save()
+            # Save many-to-many relationships
+            form.save_m2m()
             messages.success(request, "Time slot has been added successfully.")
             return redirect('manage_slots')
     else:
@@ -379,8 +544,14 @@ def edit_slot_view(request, slot_id):
     authority = request.user.authority_profile
     slot = get_object_or_404(TimeSlot, id=slot_id, authority=authority)
     
+    # Don't allow editing of booked slots
+    if slot.is_booked:
+        messages.error(request, "Cannot edit a time slot that has been booked.")
+        return redirect('manage_slots')
+    
     if request.method == 'POST':
         form = TimeSlotForm(authority, request.POST, instance=slot)
+        form.authority = authority  # Pass authority to form for validation
         if form.is_valid():
             form.save()
             messages.success(request, "Time slot has been updated successfully.")
@@ -401,6 +572,11 @@ def delete_slot_view(request, slot_id):
     """Delete a time slot"""
     authority = request.user.authority_profile
     slot = get_object_or_404(TimeSlot, id=slot_id, authority=authority)
+    
+    # Don't allow deletion of booked slots
+    if slot.is_booked:
+        messages.error(request, "Cannot delete a time slot that has been booked.")
+        return redirect('manage_slots')
     
     if request.method == 'POST':
         slot.delete()

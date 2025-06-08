@@ -12,4 +12,6 @@ urlpatterns = [
     path('my-appointments/', views.my_appointments_view, name='my_appointments'),
     path('appointment/<int:appointment_id>/', views.appointment_detail_view, name='appointment_detail'),
     path('appointment/<int:appointment_id>/cancel/', views.cancel_appointment_view, name='cancel_appointment'),
+
+    path('ajax/get-slots/', views.get_available_slots, name='get_available_slots'),
 ]

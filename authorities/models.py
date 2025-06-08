@@ -25,6 +25,12 @@ class Authority(models.Model):
     logo = models.ImageField(upload_to='authority_logos/', blank=True, null=True)
     website = models.URLField(blank=True, null=True)
     established_date = models.DateField(blank=True, null=True)
+
+    # Timing fields
+    opening_time = models.TimeField(default='09:00', help_text="Opening time (24-hour format)")
+    closing_time = models.TimeField(default='18:00', help_text="Closing time (24-hour format)")
+    open_on_weekends = models.BooleanField(default=True, help_text="Check if open on weekends")
+    
     is_verified = models.BooleanField(default=False)
     registration_number = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -107,23 +113,28 @@ class TimeSlot(models.Model):
         (5, 'Saturday'),
         (6, 'Sunday'),
     )
-    
     authority = models.ForeignKey(Authority, on_delete=models.CASCADE, related_name='time_slots')
-    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='time_slots')
-    doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, related_name='time_slots', blank=True, null=True)
+    services = models.ManyToManyField(Service, related_name='time_slots')  # Changed to ManyToMany
+    doctors = models.ManyToManyField(Doctor, related_name='time_slots', blank=True)  # Changed to ManyToMany
     weekday = models.IntegerField(choices=WEEKDAY_CHOICES)
     start_time = models.TimeField()
     end_time = models.TimeField()
     capacity = models.PositiveIntegerField(default=1)
     is_active = models.BooleanField(default=True)
+    is_booked = models.BooleanField(default=False)  # New field to track if slot is booked
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     def __str__(self):
         day = dict(self.WEEKDAY_CHOICES)[self.weekday]
-        return f"{self.authority.name} - {self.service.name} - {day} {self.start_time} to {self.end_time}"
-        
+        services_list = ", ".join([service.name for service in self.services.all()[:2]])
+        if self.services.count() > 2:
+            services_list += f" +{self.services.count() - 2} more"
+        return f"{self.authority.name} - {services_list} - {day} {self.start_time} to {self.end_time}"
+    
     class Meta:
         verbose_name = 'Time Slot'
         verbose_name_plural = 'Time Slots'
         db_table = 'time_slots'
+        # Add unique constraint to prevent duplicate slots
+        unique_together = ['authority', 'weekday', 'start_time', 'end_time']

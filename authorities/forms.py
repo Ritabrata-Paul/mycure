@@ -18,10 +18,10 @@ class AuthorityProfileForm(forms.ModelForm):
     state = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
-    postal_code = forms.CharField(  # Changed from zipcode to postal_code to match model
+    postal_code = forms.CharField(  
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
-    phone = forms.CharField(  # Added phone field
+    phone = forms.CharField(  
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
@@ -37,15 +37,45 @@ class AuthorityProfileForm(forms.ModelForm):
         required=False,
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
-    registration_number = forms.CharField(  # Added registration_number field
+
+    opening_time = forms.TimeField(
+        initial='09:00',
+        widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        help_text="Opening time (24-hour format)"
+    )
+    closing_time = forms.TimeField(
+        initial='18:00',
+        widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        help_text="Closing time (24-hour format)"
+    )
+    open_on_weekends = forms.BooleanField(
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Check if open on weekends"
+    )
+
+    registration_number = forms.CharField( 
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
+
     
     class Meta:
         model = Authority
         fields = ['name', 'description', 'address', 'city', 'state', 'postal_code',
-                  'phone', 'website', 'logo', 'established_date', 'registration_number']
+                  'phone', 'website', 'logo', 'established_date', 'opening_time', 'closing_time', 'open_on_weekends','registration_number']
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        opening_time = cleaned_data.get('opening_time')
+        closing_time = cleaned_data.get('closing_time')
+        
+        # Validate that closing time is after opening time
+        if opening_time and closing_time and opening_time >= closing_time:
+            raise forms.ValidationError("Closing time must be after opening time.")
+        
+        return cleaned_data
 
 class ServiceForm(forms.ModelForm):
     """Form for adding/editing services"""
@@ -128,14 +158,17 @@ class DoctorForm(forms.ModelForm):
 
 class TimeSlotForm(forms.ModelForm):
     """Form for adding/editing time slots"""
-    service = forms.ModelChoiceField(
+    services = forms.ModelMultipleChoiceField(
         queryset=Service.objects.none(),
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=True,
+        help_text="Select one or more services for this time slot"
     )
-    doctor = forms.ModelChoiceField(
+    doctors = forms.ModelMultipleChoiceField(
         queryset=Doctor.objects.none(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select'})
+        help_text="Select one or more doctors for this time slot"
     )
     weekday = forms.ChoiceField(
         choices=TimeSlot.WEEKDAY_CHOICES,
@@ -155,18 +188,50 @@ class TimeSlotForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
-    
+
     class Meta:
         model = TimeSlot
-        fields = ['service', 'doctor', 'weekday', 'start_time', 'end_time', 'capacity', 'is_active']
-    
+        fields = ['services', 'doctors', 'weekday', 'start_time', 'end_time', 'capacity', 'is_active']
+
     def __init__(self, authority=None, *args, **kwargs):
         super(TimeSlotForm, self).__init__(*args, **kwargs)
-        
         # If authority is provided, filter services and doctors by authority
         if authority:
-            self.fields['service'].queryset = Service.objects.filter(authority=authority)
-            self.fields['doctor'].queryset = Doctor.objects.filter(authority=authority)
+            self.fields['services'].queryset = Service.objects.filter(authority=authority, is_active=True)
+            self.fields['doctors'].queryset = Doctor.objects.filter(authority=authority, is_active=True)
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        start_time = cleaned_data.get('start_time')
+        end_time = cleaned_data.get('end_time')
+        weekday = cleaned_data.get('weekday')
+        services = cleaned_data.get('services')
+        doctors = cleaned_data.get('doctors')
+        
+        # Validate time range
+        if start_time and end_time and start_time >= end_time:
+            raise forms.ValidationError("End time must be after start time.")
+        
+        # Check for duplicate slots (same authority, weekday, start_time, end_time)
+        if hasattr(self, 'authority'):
+            existing_slots = TimeSlot.objects.filter(
+                authority=self.authority,
+                weekday=weekday,
+                start_time=start_time,
+                end_time=end_time
+            )
+            
+            # If editing, exclude current slot from check
+            if self.instance and self.instance.pk:
+                existing_slots = existing_slots.exclude(pk=self.instance.pk)
+            
+            if existing_slots.exists():
+                raise forms.ValidationError(
+                    "A time slot with the same day and time already exists. "
+                    "Please choose a different time or modify the existing slot."
+                )
+        
+        return cleaned_data
 
 class AppointmentResponseForm(forms.Form):
     """Form for responding to appointment requests"""
@@ -177,22 +242,38 @@ class AppointmentResponseForm(forms.Form):
     
     status = forms.ChoiceField(
         choices=STATUS_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=False  # Make it optional since we're handling rejection separately
     )
     rejection_reason = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={
             'class': 'form-control', 
-            'rows': 3,
-            'placeholder': 'Reason for rejection (required only if rejecting)'
-        })
+            'rows': 4,
+            'placeholder': 'Please provide a detailed reason for rejecting this appointment. This information will be shared with the patient.'
+        }),
+        help_text='This field is required when rejecting an appointment.'
     )
+    
+    def clean_rejection_reason(self):
+        rejection_reason = self.cleaned_data.get('rejection_reason', '').strip()
+        
+        # If this form is being used for rejection, make sure reason is provided
+        if not rejection_reason:
+            raise forms.ValidationError('Please provide a reason for rejection.')
+        
+        # Ensure minimum length
+        if len(rejection_reason) < 10:
+            raise forms.ValidationError('Please provide a more detailed reason (at least 10 characters).')
+            
+        return rejection_reason
     
     def clean(self):
         cleaned_data = super().clean()
         status = cleaned_data.get('status')
         rejection_reason = cleaned_data.get('rejection_reason')
         
+        # If status is REJECTED, rejection_reason is required
         if status == 'REJECTED' and not rejection_reason:
             self.add_error('rejection_reason', 'Please provide a reason for rejection.')
             

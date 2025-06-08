@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Services - MyCure{% endblock %}
+{% block title %}Services - MyCure360{% endblock %}
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -18,7 +18,7 @@
     <!-- Services Stats -->
     <div class="row mb-4">
         <!-- Total Services -->
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card h-100 border-primary">
                 <div class="card-body text-center">
                     <h5 class="card-title" style="font-size: 1.2rem;">Total Services</h5>
@@ -27,41 +27,27 @@
                 </div>
             </div>
         </div>
-
         <!-- Active Services -->
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card h-100 border-success">
                 <div class="card-body text-center">
                     <h5 class="card-title text-success" style="font-size: 1.2rem;">Active</h5>
-                    <h2 class="display-4 text-success" style="font-size: 2rem;">{{ services|dictsortreversed:"is_active"|first }}</h2>
+                    <h2 class="display-4 text-success" style="font-size: 2rem;">{{ active_count }}</h2>
                     <p class="text-muted" style="font-size: 0.9rem;">Available for booking</p>
                 </div>
             </div>
         </div>
-
         <!-- Inactive Services -->
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card h-100 border-danger">
                 <div class="card-body text-center">
                     <h5 class="card-title text-danger" style="font-size: 1.2rem;">Inactive</h5>
-                    <h2 class="display-4 text-danger" style="font-size: 2rem;">{{ services|dictsort:"is_active"|first }}</h2>
+                    <h2 class="display-4 text-danger" style="font-size: 2rem;">{{ inactive_count }}</h2>
                     <p class="text-muted" style="font-size: 0.9rem;">Currently unavailable</p>
                 </div>
             </div>
         </div>
-
-        <!-- Services With Doctors -->
-        <div class="col-md-3 mb-3">
-            <div class="card h-100 border-info">
-                <div class="card-body text-center">
-                    <h5 class="card-title text-info" style="font-size: 1.2rem;">With Doctors</h5>
-                    <h2 class="display-4 text-info" style="font-size: 2rem;">{{ services_with_doctors }}</h2>
-                    <p class="text-muted" style="font-size: 0.9rem;">Doctor assigned</p>
-                </div>
-            </div>
-        </div>
     </div>
-
     
     <!-- Filters -->
     <div class="card mb-4">
@@ -75,7 +61,7 @@
                     <select name="doctor" id="doctor" class="form-select">
                         <option value="">All Doctors</option>
                         {% for doctor in authority.doctors.all %}
-                        <option value="{{ doctor.id }}" {% if request.GET.doctor == doctor.id|stringformat:"s" %}selected{% endif %}>{{ doctor.name }}</option>
+                        <option value="{{ doctor.id }}" {% if current_filters.doctor == doctor.id|stringformat:"s" %}selected{% endif %}>{{ doctor.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -83,18 +69,18 @@
                     <label for="status" class="form-label">Status</label>
                     <select name="status" id="status" class="form-select">
                         <option value="">All Status</option>
-                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
-                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="active" {% if current_filters.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if current_filters.status == 'inactive' %}selected{% endif %}>Inactive</option>
                     </select>
                 </div>
                 <div class="col-md-4">
                     <label for="price" class="form-label">Price Range</label>
                     <select name="price" id="price" class="form-select">
                         <option value="">All Prices</option>
-                        <option value="0-100" {% if request.GET.price == '0-100' %}selected{% endif %}>$0 - $100</option>
-                        <option value="101-500" {% if request.GET.price == '101-500' %}selected{% endif %}>$101 - $500</option>
-                        <option value="501-1000" {% if request.GET.price == '501-1000' %}selected{% endif %}>$501 - $1000</option>
-                        <option value="1001+" {% if request.GET.price == '1001+' %}selected{% endif %}>$1001+</option>
+                        <option value="0-100" {% if current_filters.price == '0-100' %}selected{% endif %}>$0 - $100</option>
+                        <option value="101-500" {% if current_filters.price == '101-500' %}selected{% endif %}>$101 - $500</option>
+                        <option value="501-1000" {% if current_filters.price == '501-1000' %}selected{% endif %}>$501 - $1000</option>
+                        <option value="1001+" {% if current_filters.price == '1001+' %}selected{% endif %}>$1001+</option>
                     </select>
                 </div>
                 <div class="col-12 text-end">
@@ -118,11 +104,11 @@
                     <i class="bi bi-sort-alpha-down me-1"></i> Sort By
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
-                    <li><a class="dropdown-item" href="?sort=name">Name</a></li>
-                    <li><a class="dropdown-item" href="?sort=price">Price (Low to High)</a></li>
-                    <li><a class="dropdown-item" href="?sort=-price">Price (High to Low)</a></li>
-                    <li><a class="dropdown-item" href="?sort=duration">Duration</a></li>
-                    <li><a class="dropdown-item" href="?sort=-created_at">Newest First</a></li>
+                    <li><a class="dropdown-item" href="?sort=name{% if current_filters.doctor %}&doctor={{ current_filters.doctor }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.price %}&price={{ current_filters.price }}{% endif %}">Name</a></li>
+                    <li><a class="dropdown-item" href="?sort=price{% if current_filters.doctor %}&doctor={{ current_filters.doctor }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.price %}&price={{ current_filters.price }}{% endif %}">Price (Low to High)</a></li>
+                    <li><a class="dropdown-item" href="?sort=-price{% if current_filters.doctor %}&doctor={{ current_filters.doctor }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.price %}&price={{ current_filters.price }}{% endif %}">Price (High to Low)</a></li>
+                    <li><a class="dropdown-item" href="?sort=duration{% if current_filters.doctor %}&doctor={{ current_filters.doctor }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.price %}&price={{ current_filters.price }}{% endif %}">Duration</a></li>
+                    <li><a class="dropdown-item" href="?sort=-created_at{% if current_filters.doctor %}&doctor={{ current_filters.doctor }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.price %}&price={{ current_filters.price }}{% endif %}">Newest First</a></li>
                 </ul>
             </div>
         </div>
@@ -206,55 +192,28 @@
                 {% endfor %}
             </div>
             
-            <!-- Pagination -->
-            {% if services.has_other_pages %}
-            <nav aria-label="Page navigation" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    {% if services.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ services.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.doctor %}&doctor={{ request.GET.doctor }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}">Previous</a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Previous</span>
-                    </li>
-                    {% endif %}
-                    
-                    {% for i in services.paginator.page_range %}
-                    {% if services.number == i %}
-                    <li class="page-item active">
-                        <span class="page-link">{{ i }}</span>
-                    </li>
-                    {% else %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ i }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.doctor %}&doctor={{ request.GET.doctor }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}">{{ i }}</a>
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-                    
-                    {% if services.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ services.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.doctor %}&doctor={{ request.GET.doctor }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.price %}&price={{ request.GET.price }}{% endif %}">Next</a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Next</span>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
-            
             {% else %}
             <div class="text-center py-5">
                 <div class="mb-3">
                     <i class="bi bi-clipboard-plus text-muted" style="font-size: 3rem;"></i>
                 </div>
                 <h4>No Services Found</h4>
-                <p class="text-muted">You haven't added any services yet.</p>
+                <p class="text-muted">
+                    {% if current_filters.doctor or current_filters.status or current_filters.price %}
+                        No services match your current filters. Try adjusting your search criteria.
+                    {% else %}
+                        You haven't added any services yet.
+                    {% endif %}
+                </p>
+                {% if not current_filters.doctor and not current_filters.status and not current_filters.price %}
                 <a href="{% url 'add_service' %}" class="btn btn-primary mt-2">
                     <i class="bi bi-plus-circle me-2"></i> Add Your First Service
                 </a>
+                {% else %}
+                <a href="{% url 'manage_services' %}" class="btn btn-outline-primary mt-2">
+                    <i class="bi bi-x-circle me-2"></i> Clear All Filters
+                </a>
+                {% endif %}
             </div>
             {% endif %}
         </div>

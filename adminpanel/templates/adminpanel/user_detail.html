@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
-{% block title %}User Details | MyCure Admin{% endblock %}
-
+{% block title %}User Details | MyCure360 Admin{% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
     <nav aria-label="breadcrumb">
@@ -12,6 +10,14 @@
             <li class="breadcrumb-item active" aria-current="page">{{ user_detail.get_full_name }}</li>
         </ol>
     </nav>
+
+    <!-- Professional Back Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'manage_users' %}" class="btn btn-outline-secondary d-flex align-items-center px-3 py-2 rounded-3 shadow-sm hover-effect">
+            <i class="fas fa-arrow-left me-2"></i> 
+            <span class="fw-medium">Back to Users</span>
+        </a>
+    </div>
 
     {% if messages %}
         {% for message in messages %}
@@ -23,13 +29,13 @@
     {% endif %}
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2">User Profile</h1>
-        <div>
-            <a href="{% url 'edit_user' user_detail.id %}" class="btn btn-outline-primary me-2">
-                <i class="fas fa-edit me-1"></i> Edit User
+        <h1 class="h2 mb-0">User Profile</h1>
+        <div class="d-flex gap-2">
+            <a href="{% url 'edit_user' user_detail.id %}" class="btn btn-outline-primary d-flex align-items-center px-3 py-2 rounded-3 shadow-sm hover-effect">
+                <i class="fas fa-edit me-2"></i> Edit User
             </a>
-            <a href="{% url 'delete_user' user_detail.id %}" class="btn btn-outline-danger">
-                <i class="fas fa-trash me-1"></i> Delete User
+            <a href="{% url 'delete_user' user_detail.id %}" class="btn btn-outline-danger d-flex align-items-center px-3 py-2 rounded-3 shadow-sm hover-effect">
+                <i class="fas fa-trash me-2"></i> Delete User
             </a>
         </div>
     </div>
@@ -48,7 +54,6 @@
                             {{ user_detail.get_user_type_display }}
                         </span>
                     </div>
-
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item px-0 py-3 d-flex justify-content-between">
                             <span class="text-muted">Email</span>
@@ -108,7 +113,6 @@
                             <p class="mb-0 text-muted">{{ authority.get_authority_type_display }}</p>
                         </div>
                     </div>
-
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <small class="text-muted d-block">Verification Status</small>
@@ -123,12 +127,10 @@
                             {{ authority.registration_number|default:"Not provided" }}
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <small class="text-muted d-block">Address</small>
                         {{ authority.address }}, {{ authority.city }}, {{ authority.state }} {{ authority.zipcode }}
                     </div>
-
                     <div>
                         <small class="text-muted d-block">Description</small>
                         <p>{{ authority.description }}</p>
@@ -139,7 +141,7 @@
 
             {% if user_detail.user_type == 'CUSTOMER' and appointments %}
             <!-- Customer Appointments -->
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">Recent Appointments</h5>
                 </div>
@@ -210,32 +212,125 @@
             </div>
             {% endif %}
 
-            <!-- Activity Log -->
+            <!-- Enhanced Activity Log -->
             <div class="card border-0 shadow-sm mt-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">Activity Log</h5>
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history text-primary me-2"></i>Activity Log</h5>
+                    <span class="badge bg-light text-dark">Recent Activity</span>
                 </div>
                 <div class="card-body">
                     <div class="timeline">
+                        <!-- Account Created -->
                         <div class="timeline-item">
-                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-marker bg-success">
+                                <i class="fas fa-user-plus text-white" style="font-size: 8px;"></i>
+                            </div>
                             <div class="timeline-content">
-                                <h6 class="mb-0">Account Created</h6>
-                                <small class="text-muted">{{ user_detail.date_joined|date:"M d, Y H:i" }}</small>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1 fw-semibold">Account Created</h6>
+                                        <p class="text-muted mb-0 small">User account was successfully created</p>
+                                    </div>
+                                    <small class="text-muted">{{ user_detail.date_joined|date:"M d, Y H:i" }}</small>
+                                </div>
                             </div>
                         </div>
-                        
+
+                        <!-- Last Login -->
                         {% if user_detail.last_login %}
                         <div class="timeline-item">
-                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-marker bg-primary">
+                                <i class="fas fa-sign-in-alt text-white" style="font-size: 8px;"></i>
+                            </div>
                             <div class="timeline-content">
-                                <h6 class="mb-0">Last Login</h6>
-                                <small class="text-muted">{{ user_detail.last_login|date:"M d, Y H:i" }}</small>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1 fw-semibold">Last Login</h6>
+                                        <p class="text-muted mb-0 small">User logged into the system</p>
+                                    </div>
+                                    <small class="text-muted">{{ user_detail.last_login|date:"M d, Y H:i" }}</small>
+                                </div>
                             </div>
                         </div>
                         {% endif %}
-                        
-                        <!-- Add more activity items if you have logging enabled -->
+
+                        <!-- Authority Verification (for Authority users) -->
+                        {% if user_detail.user_type == 'AUTHORITY' and authority %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker {% if authority.is_verified %}bg-success{% else %}bg-warning{% endif %}">
+                                <i class="fas {% if authority.is_verified %}fa-check{% else %}fa-clock{% endif %} text-white" style="font-size: 8px;"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1 fw-semibold">Authority {% if authority.is_verified %}Verified{% else %}Pending Verification{% endif %}</h6>
+                                        <p class="text-muted mb-0 small">
+                                            {% if authority.is_verified %}
+                                                Authority has been verified by admin
+                                            {% else %}
+                                                Authority verification is pending
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <small class="text-muted">{{ authority.created_at|date:"M d, Y H:i" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Recent Appointments (for Customers) -->
+                        {% if user_detail.user_type == 'CUSTOMER' and appointments %}
+                            {% for appointment in appointments|slice:":3" %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker {% if appointment.status == 'COMPLETED' %}bg-info{% elif appointment.status == 'APPROVED' %}bg-success{% elif appointment.status == 'CANCELLED' %}bg-danger{% else %}bg-warning{% endif %}">
+                                    <i class="fas fa-calendar-check text-white" style="font-size: 8px;"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1 fw-semibold">Appointment {{ appointment.get_status_display }}</h6>
+                                            <p class="text-muted mb-0 small">
+                                                {{ appointment.service.name }} at {{ appointment.authority.name }}
+                                            </p>
+                                        </div>
+                                        <small class="text-muted">{{ appointment.created_at|date:"M d, Y H:i" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <!-- Profile Updates (placeholder - you'd need to track this) -->
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info">
+                                <i class="fas fa-edit text-white" style="font-size: 8px;"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1 fw-semibold">Profile Information</h6>
+                                        <p class="text-muted mb-0 small">User profile details are up to date</p>
+                                    </div>
+                                    <small class="text-muted">{{ user_detail.date_joined|date:"M d, Y H:i" }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty state if no significant activity -->
+                        {% if not user_detail.last_login and user_detail.user_type == 'CUSTOMER' and not appointments %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-light">
+                                <i class="fas fa-info text-secondary" style="font-size: 8px;"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="text-center py-3">
+                                    <i class="fas fa-clock fa-2x text-muted mb-2"></i>
+                                    <p class="text-muted mb-0">Limited activity detected</p>
+                                    <small class="text-muted">User hasn't been very active recently</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -246,27 +341,140 @@
 
 {% block extra_css %}
 <style>
-    /* Timeline styling */
+    /* Professional button hover effects */
+    .hover-effect {
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    
+    .hover-effect:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+    
+    .btn-outline-secondary.hover-effect:hover {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-outline-primary.hover-effect:hover {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
+    }
+    
+    .btn-outline-danger.hover-effect:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+
+    /* Enhanced Timeline styling */
     .timeline {
         position: relative;
-        padding-left: 30px;
+        padding-left: 40px;
+        margin-top: 10px;
     }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 19px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #e9ecef 0%, #dee2e6 100%);
+    }
+    
     .timeline-item {
         position: relative;
-        padding-bottom: 1.5rem;
-        border-left: 2px solid #e9ecef;
-        padding-left: 20px;
+        padding-bottom: 2rem;
+        padding-left: 25px;
     }
+    
     .timeline-item:last-child {
         padding-bottom: 0;
     }
+    
+    .timeline-item:last-child::after {
+        content: '';
+        position: absolute;
+        left: -31px;
+        bottom: -10px;
+        width: 2px;
+        height: 20px;
+        background: linear-gradient(to bottom, #dee2e6 0%, transparent 100%);
+    }
+    
     .timeline-marker {
         position: absolute;
-        left: -9px;
-        width: 16px;
-        height: 16px;
+        left: -31px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
-        top: 0;
+        top: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        z-index: 1;
+    }
+    
+    .timeline-content {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 3px solid #e9ecef;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .timeline-content:hover {
+        background: #ffffff;
+        border-left-color: #0d6efd;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transform: translateX(2px);
+    }
+    
+    .timeline-content::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 20px;
+        width: 0;
+        height: 0;
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+        border-right: 6px solid #f8f9fa;
+        transition: border-right-color 0.3s ease;
+    }
+    
+    .timeline-content:hover::before {
+        border-right-color: #ffffff;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .timeline {
+            padding-left: 30px;
+        }
+        
+        .timeline-marker {
+            left: -25px;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .timeline-item {
+            padding-left: 20px;
+        }
+        
+        .timeline::before {
+            left: 15px;
+        }
     }
 </style>
 {% endblock %}

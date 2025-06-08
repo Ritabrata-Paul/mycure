@@ -3,10 +3,142 @@
 
 {% block title %}Edit Time Slot - {{ authority.name }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .service-doctor-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .checkbox-group {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        background: white;
+    }
+    
+    .form-check {
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+    
+    .form-check:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .form-check-input:checked + .form-check-label {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+    
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .section-title i {
+        color: #007bff;
+    }
+    
+    .time-input {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 8px 12px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .time-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        padding: 20px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 6px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+    
+    .btn-outline-secondary {
+        border-radius: 6px;
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+    
+    .alert-warning {
+        border-left: 4px solid #ffc107;
+        border-radius: 8px;
+        background: #fff3cd;
+    }
+    
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 8px 12px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .no-options {
+        color: #6c757d;
+        font-style: italic;
+        padding: 10px;
+        text-align: center;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container my-4">
     <div class="row">
-        <div class="col-lg-8 mx-auto">
+        <div class="col-lg-10 mx-auto">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'authority_dashboard' %}">Dashboard</a></li>
@@ -16,8 +148,8 @@
             </nav>
 
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Edit Time Slot</h4>
+                <div class="card-header text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Time Slot</h4>
                 </div>
                 <div class="card-body">
                     {% if messages %}
@@ -32,42 +164,92 @@
                     <form method="post" novalidate>
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label for="{{ form.service.id_for_label }}" class="form-label">Service</label>
-                            {{ form.service }}
-                            {% if form.service.errors %}
-                                <div class="text-danger">
-                                    {{ form.service.errors }}
+                        <!-- Services Selection -->
+                        <div class="service-doctor-section">
+                            <div class="section-title">
+                                <i class="fas fa-stethoscope"></i>
+                                Services <span class="text-danger">*</span>
+                            </div>
+                            <div class="checkbox-group">
+                                {% if form.services.field.queryset %}
+                                    {% for choice in form.services %}
+                                        <div class="form-check">
+                                            {{ choice.tag }}
+                                            <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                {{ choice.choice_label }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="no-options">
+                                        No active services available. Please add services first.
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% if form.services.errors %}
+                                <div class="text-danger mt-2">
+                                    {{ form.services.errors }}
                                 </div>
                             {% endif %}
-                            <div class="form-text">Select which service this time slot is for</div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Select one or more services for this time slot
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.doctor.id_for_label }}" class="form-label">Doctor (Optional)</label>
-                            {{ form.doctor }}
-                            {% if form.doctor.errors %}
-                                <div class="text-danger">
-                                    {{ form.doctor.errors }}
+                        <!-- Doctors Selection -->
+                        <div class="service-doctor-section">
+                            <div class="section-title">
+                                <i class="fas fa-user-md"></i>
+                                Doctors (Optional)
+                            </div>
+                            <div class="checkbox-group">
+                                {% if form.doctors.field.queryset %}
+                                    {% for choice in form.doctors %}
+                                        <div class="form-check">
+                                            {{ choice.tag }}
+                                            <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                {{ choice.choice_label }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="no-options">
+                                        No active doctors available. You can add doctors later if needed.
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% if form.doctors.errors %}
+                                <div class="text-danger mt-2">
+                                    {{ form.doctors.errors }}
                                 </div>
                             {% endif %}
-                            <div class="form-text">Assign a doctor to this time slot if applicable</div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Select one or more doctors for this time slot (optional)
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.weekday.id_for_label }}" class="form-label">Day of Week</label>
-                            {{ form.weekday }}
-                            {% if form.weekday.errors %}
-                                <div class="text-danger">
-                                    {{ form.weekday.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-
+                        <!-- Schedule Details -->
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="{{ form.start_time.id_for_label }}" class="form-label">Start Time</label>
+                                    <label for="{{ form.weekday.id_for_label }}" class="form-label">
+                                        <i class="fas fa-calendar me-1"></i>Day of Week <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.weekday }}
+                                    {% if form.weekday.errors %}
+                                        <div class="text-danger">
+                                            {{ form.weekday.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.start_time.id_for_label }}" class="form-label">
+                                        <i class="fas fa-clock me-1"></i>Start Time <span class="text-danger">*</span>
+                                    </label>
                                     {{ form.start_time }}
                                     {% if form.start_time.errors %}
                                         <div class="text-danger">
@@ -76,9 +258,11 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="{{ form.end_time.id_for_label }}" class="form-label">End Time</label>
+                                    <label for="{{ form.end_time.id_for_label }}" class="form-label">
+                                        <i class="fas fa-clock me-1"></i>End Time <span class="text-danger">*</span>
+                                    </label>
                                     {{ form.end_time }}
                                     {% if form.end_time.errors %}
                                         <div class="text-danger">
@@ -89,32 +273,66 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.capacity.id_for_label }}" class="form-label">Capacity</label>
-                            {{ form.capacity }}
-                            {% if form.capacity.errors %}
-                                <div class="text-danger">
-                                    {{ form.capacity.errors }}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.capacity.id_for_label }}" class="form-label">
+                                        <i class="fas fa-users me-1"></i>Capacity <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.capacity }}
+                                    {% if form.capacity.errors %}
+                                        <div class="text-danger">
+                                            {{ form.capacity.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Maximum number of appointments for this slot</div>
                                 </div>
-                            {% endif %}
-                            <div class="form-text">Maximum number of appointments that can be booked in this time slot</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-toggle-on me-1"></i>Status
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        {{ form.is_active }}
+                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                            Active Time Slot
+                                        </label>
+                                    </div>
+                                    <div class="form-text">Toggle to enable/disable this time slot</div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3 form-check">
-                            {{ form.is_active }}
-                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active</label>
-                            <div class="form-text">Uncheck to temporarily disable this time slot</div>
-                        </div>
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'manage_slots' %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Update Time Slot</button>
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a href="{% url 'manage_slots' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Update Time Slot
+                            </button>
                         </div>
                     </form>
 
+                    <!-- Important Notes -->
                     <div class="alert alert-warning mt-4">
-                        <h5 class="alert-heading">Note:</h5>
-                        <p class="mb-0">Editing this time slot will not affect existing appointments. Any changes will apply to new bookings only.</p>
+                        <h5 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Important Notes:
+                        </h5>
+                        <ul class="mb-0">
+                            <li>Editing this time slot will not affect existing appointments</li>
+                            <li>Changes will apply to new bookings only</li>
+                            <li>You cannot create duplicate slots for the same day and time</li>
+                            <li>Once a slot is booked, it cannot be edited until the appointment is completed</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -124,19 +342,81 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script>
-    // Add any JavaScript needed for dynamic form behavior
-    document.addEventListener('DOMContentLoaded', function() {
-        // Example: Service selection might filter available doctors
-        const serviceSelect = document.querySelector('#{{ form.service.id_for_label }}');
-        const doctorSelect = document.querySelector('#{{ form.doctor.id_for_label }}');
+document.addEventListener('DOMContentLoaded', function() {
+    // Add visual feedback for checkbox selections
+    const checkboxes = document.querySelectorAll('.form-check-input');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const formCheck = this.closest('.form-check');
+            if (this.checked) {
+                formCheck.style.backgroundColor = '#e3f2fd';
+                formCheck.style.borderLeft = '3px solid #007bff';
+            } else {
+                formCheck.style.backgroundColor = '';
+                formCheck.style.borderLeft = '';
+            }
+        });
         
-        if (serviceSelect && doctorSelect) {
-            serviceSelect.addEventListener('change', function() {
-                // You could implement an AJAX call here to update the doctor options
-                // based on the selected service
+        // Initialize styling for pre-selected items
+        if (checkbox.checked) {
+            const formCheck = checkbox.closest('.form-check');
+            formCheck.style.backgroundColor = '#e3f2fd';
+            formCheck.style.borderLeft = '3px solid #007bff';
+        }
+    });
+    
+    // Validate time range on change
+    const startTimeInput = document.querySelector('#{{ form.start_time.id_for_label }}');
+    const endTimeInput = document.querySelector('#{{ form.end_time.id_for_label }}');
+    
+    function validateTimeRange() {
+        if (startTimeInput.value && endTimeInput.value) {
+            const startTime = new Date('1970-01-01T' + startTimeInput.value);
+            const endTime = new Date('1970-01-01T' + endTimeInput.value);
+            
+            if (startTime >= endTime) {
+                endTimeInput.setCustomValidity('End time must be after start time');
+                endTimeInput.classList.add('is-invalid');
+            } else {
+                endTimeInput.setCustomValidity('');
+                endTimeInput.classList.remove('is-invalid');
+            }
+        }
+    }
+    
+    if (startTimeInput && endTimeInput) {
+        startTimeInput.addEventListener('change', validateTimeRange);
+        endTimeInput.addEventListener('change', validateTimeRange);
+    }
+    
+    // Form submission validation
+    const form = document.querySelector('form');
+    const servicesCheckboxes = document.querySelectorAll('input[name="services"]');
+    
+    form.addEventListener('submit', function(e) {
+        const checkedServices = Array.from(servicesCheckboxes).some(cb => cb.checked);
+        
+        if (!checkedServices) {
+            e.preventDefault();
+            alert('Please select at least one service for this time slot.');
+            document.querySelector('.service-doctor-section').scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
             });
         }
     });
+    
+    // Add smooth scrolling for form validation errors
+    const errorElements = document.querySelectorAll('.text-danger');
+    if (errorElements.length > 0) {
+        errorElements[0].scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    }
+});
 </script>
 {% endblock %}

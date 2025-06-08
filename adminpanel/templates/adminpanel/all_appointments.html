@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}All Appointments | MyCure Admin{% endblock %}
+{% block title %}All Appointments | MyCure360 Admin{% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -186,7 +186,12 @@
         <div class="col-md-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-0">
-                    <h5 class="mb-0">Appointment Status Summary</h5>
+                    <h5 class="mb-0">
+                        Appointment Status Summary
+                        {% if status or authority_id or search_query %}
+                        <span class="badge bg-info ms-2">Filtered</span>
+                        {% endif %}
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-around text-center">
@@ -211,18 +216,25 @@
             </div>
         </div>
         <!-- Monthly Appointments -->
-<div class="col-md-6">
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0">
-            <h5 class="mb-0">Monthly Appointments</h5>
-        </div>
-        <div class="card-body">
-            <canvas id="appointmentsChart" height="150"></canvas>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        Monthly Appointments (Last 6 Months)
+                        {% if status or authority_id or search_query %}
+                        <span class="badge bg-info ms-2">Filtered</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="appointmentsChart" height="150"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-</div>
 {% endblock %}
+
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -232,30 +244,37 @@
             $(this).closest('form').submit();
         });
         
-        // Chart JS - Monthly appointments with actual data from the backend
+        // Chart JS - Monthly appointments with filtered data
         const ctx = document.getElementById('appointmentsChart').getContext('2d');
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const currentMonth = new Date().getMonth();
-        const lastSixMonths = months.slice(Math.max(0, currentMonth - 5), currentMonth + 1);
         
-        // Monthly appointment counts from the backend
-        const appointmentCounts = [
+        // Get monthly data from backend
+        const monthlyData = [
             {% for month_data in monthly_appointments %}
-                {{ month_data.count }},
+            {
+                month: '{{ month_data.month }}',
+                count: {{ month_data.count }}
+            }{% if not forloop.last %},{% endif %}
             {% endfor %}
         ];
+        
+        const labels = monthlyData.map(item => item.month);
+        const data = monthlyData.map(item => item.count);
         
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: lastSixMonths,
+                labels: labels,
                 datasets: [{
                     label: 'Total Appointments',
-                    data: appointmentCounts,
+                    data: data,
                     borderColor: '#0d6efd',
                     backgroundColor: 'rgba(13, 110, 253, 0.1)',
                     tension: 0.3,
-                    fill: true
+                    fill: true,
+                    pointBackgroundColor: '#0d6efd',
+                    pointBorderColor: '#0d6efd',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
@@ -264,6 +283,13 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Appointments: ' + context.parsed.y;
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -272,6 +298,9 @@
                         grid: {
                             display: true,
                             color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            stepSize: 1
                         }
                     },
                     x: {
@@ -282,6 +311,12 @@
                 }
             }
         });
+        
+        // Show message if no data
+        if (data.every(count => count === 0)) {
+            const chartContainer = document.getElementById('appointmentsChart').parentElement;
+            chartContainer.innerHTML = '<div class="text-center text-muted py-3"><i class="fas fa-chart-line fa-2x mb-2"></i><br>No appointment data for the selected filters</div>';
+        }
     });
 </script>
 {% endblock %}
