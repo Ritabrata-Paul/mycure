@@ -84,7 +84,6 @@ def appointment_detail_view(request, appointment_id):
 def authority_appointments_view(request):
     """View authority's appointments with filtering"""
     authority = request.user.authority_profile
-    
     # Get all appointments for this authority
     all_appointments = Appointment.objects.filter(authority=authority)
     
@@ -248,7 +247,7 @@ def reject_appointment_view(request, appointment_id):
 def manage_services_view(request):
     """Manage authority services"""
     authority = request.user.authority_profile
-    services = Service.objects.filter(authority=authority)
+    services = Service.objects.filter(authority=authority).prefetch_related('doctors')
     
     # Apply filters
     doctor_filter = request.GET.get('doctor')
@@ -256,9 +255,9 @@ def manage_services_view(request):
     price_filter = request.GET.get('price')
     sort_by = request.GET.get('sort', 'name')
     
-    # Filter by doctor
+    # Filter by doctor - Fixed to work with ManyToMany relationship
     if doctor_filter:
-        services = services.filter(doctor_id=doctor_filter)
+        services = services.filter(doctors__id=doctor_filter)
     
     # Filter by status
     if status_filter == 'active':
@@ -266,7 +265,7 @@ def manage_services_view(request):
     elif status_filter == 'inactive':
         services = services.filter(is_active=False)
     
-    # Filter by price range
+    # Filter by price range - Fixed syntax errors
     if price_filter:
         if price_filter == '0-100':
             services = services.filter(price__lte=100)
@@ -291,14 +290,21 @@ def manage_services_view(request):
     else:
         services = services.order_by('name')
     
+    # Remove duplicates that might occur due to ManyToMany filtering
+    services = services.distinct()
+    
     # Calculate statistics
     all_services = Service.objects.filter(authority=authority)
     active_count = all_services.filter(is_active=True).count()
     inactive_count = all_services.filter(is_active=False).count()
     
+    # Get all doctors for filter dropdown
+    doctors = Doctor.objects.filter(authority=authority, is_active=True).order_by('name')
+    
     context = {
         'authority': authority,
         'services': services,
+        'doctors': doctors,  # Added this for the filter dropdown
         'active_count': active_count,
         'inactive_count': inactive_count,
         'current_filters': {
@@ -322,6 +328,8 @@ def add_service_view(request):
             service = form.save(commit=False)
             service.authority = authority
             service.save()
+            # Save many-to-many relationships
+            form.save_m2m()
             messages.success(request, "Service has been added successfully.")
             return redirect('manage_services')
     else:
@@ -344,6 +352,7 @@ def edit_service_view(request, service_id):
         form = ServiceForm(authority, request.POST, instance=service)
         if form.is_valid():
             form.save()
+            # save_m2m() is automatically called when using form.save() with instance
             messages.success(request, "Service has been updated successfully.")
             return redirect('manage_services')
     else:
@@ -512,20 +521,39 @@ def change_slot_status(request, slot_id):
 
 
 
-@login_required
-@authority_required
 def add_slot_view(request):
-    """Add a new time slot"""
+    """Add a new time slot with enhanced doctor-service validation"""
     authority = request.user.authority_profile
+    
     if request.method == 'POST':
         form = TimeSlotForm(authority, request.POST)
-        form.authority = authority  # Pass authority to form for validation
         if form.is_valid():
             slot = form.save(commit=False)
             slot.authority = authority
             slot.save()
+            
             # Save many-to-many relationships
             form.save_m2m()
+            
+            # Additional logic: If services have specific doctors assigned,
+            # ensure only those doctors are available for this slot
+            selected_services = form.cleaned_data['services']
+            selected_doctors = form.cleaned_data['doctors']
+            
+            # If no doctors were explicitly selected, auto-assign based on services
+            if not selected_doctors:
+                auto_doctors = set()
+                for service in selected_services:
+                    service_doctors = service.doctors.filter(is_active=True)
+                    auto_doctors.update(service_doctors)
+                
+                if auto_doctors:
+                    slot.doctors.set(auto_doctors)
+                    messages.info(request, 
+                        f"Doctors were automatically assigned based on selected services: "
+                        f"{', '.join([doctor.name for doctor in auto_doctors])}"
+                    )
+            
             messages.success(request, "Time slot has been added successfully.")
             return redirect('manage_slots')
     else:
@@ -536,6 +564,47 @@ def add_slot_view(request):
         'authority': authority,
     }
     return render(request, 'authorities/add_slot.html', context)
+
+def get_available_doctors_for_services(request):
+    """AJAX endpoint to get available doctors based on selected services"""
+    if request.method == 'GET':
+        authority = request.user.authority_profile
+        service_ids = request.GET.getlist('services[]')
+        
+        if service_ids:
+            # Get all services
+            services = Service.objects.filter(
+                id__in=service_ids, 
+                authority=authority, 
+                is_active=True
+            )
+            
+            # Get all doctors assigned to these services
+            available_doctors = set()
+            for service in services:
+                service_doctors = service.doctors.filter(is_active=True)
+                available_doctors.update(service_doctors)
+            
+            # Convert to list of dictionaries for JSON response
+            doctors_data = [
+                {
+                    'id': doctor.id,
+                    'name': doctor.name,
+                    'specialization': doctor.specialization
+                }
+                for doctor in available_doctors
+            ]
+            
+            return JsonResponse({
+                'success': True,
+                'doctors': doctors_data
+            })
+        
+        return JsonResponse({
+            'success': False,
+            'message': 'No services selected'
+        })
+
 
 @login_required
 @authority_required
@@ -683,7 +752,6 @@ def update_appointment_status_view(request, appointment_id):
 def get_appointments_json(request):
     """API endpoint to get all appointments for the calendar"""
     authority = request.user.authority_profile
-    
     # Get all appointments for this authority
     appointments = Appointment.objects.filter(authority=authority)
     
@@ -698,7 +766,6 @@ def get_appointments_json(request):
             'CANCELLED': '#6c757d',  # secondary
             'COMPLETED': '#17a2b8',  # info
         }
-        
         color = status_colors.get(appointment.status, '#007bff')  # Default to primary
         
         # Format the date and time for display
@@ -719,7 +786,6 @@ def get_appointments_json(request):
                 'time': formatted_time,
             }
         }
-        
         events.append(event)
     
     return JsonResponse(events, safe=False)

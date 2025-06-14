@@ -829,47 +829,114 @@
 
 {% block extra_js %}
 <script>
-    // Simple counter animation
-    document.addEventListener("DOMContentLoaded", function() {
-        const counters = document.querySelectorAll('.counter');
-        const speed = 200;
+// Updated counter animation with mobile compatibility and Intersection Observer
+document.addEventListener("DOMContentLoaded", function() {
+    const counters = document.querySelectorAll('.counter');
+    
+    // Check if Intersection Observer is supported
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    observer.unobserve(entry.target); // Stop observing once animated
+                }
+            });
+        }, {
+            threshold: 0.3, // Trigger when 30% of the element is visible
+            rootMargin: '0px 0px -50px 0px' // Start animation 50px before element is fully visible
+        });
         
         counters.forEach(counter => {
-            const updateCount = () => {
-                const target = +counter.innerText.replace(/\D/g, '');
-                const count = +counter.innerText.replace(/\D/g, '');
-                
-                if (count < target) {
-                    counter.innerText = Math.ceil(count + target / speed) + '+';
-                    setTimeout(updateCount, 1);
-                } else {
-                    counter.innerText = target + '+';
-                }
-            };
-            
-            updateCount();
+            observer.observe(counter);
+        });
+    } else {
+        // Fallback for older browsers - animate after a delay
+        setTimeout(() => {
+            counters.forEach(counter => {
+                animateCounter(counter);
+            });
+        }, 1000);
+    }
+    
+    function animateCounter(counter) {
+        const target = parseInt(counter.innerText.replace(/\D/g, ''));
+        const duration = 2000; // 2 seconds
+        const frameRate = 16; // ~60fps
+        const totalFrames = duration / frameRate;
+        const increment = target / totalFrames;
+        let current = 0;
+        
+        // Reset counter to 0 before starting animation
+        counter.innerText = '0+';
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                counter.innerText = target.toLocaleString() + '+';
+                clearInterval(timer);
+            } else {
+                counter.innerText = Math.floor(current).toLocaleString() + '+';
+            }
+        }, frameRate);
+    }
+});
+
+// Bootstrap tooltip initialization
+document.addEventListener("DOMContentLoaded", function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+// Image lazy loading fallback and error handling
+document.addEventListener("DOMContentLoaded", function() {
+    // Handle image loading errors with better fallbacks
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+        img.addEventListener('error', function() {
+            // Don't replace if already a placeholder
+            if (!this.src.includes('placeholder') && !this.src.includes('via.placeholder')) {
+                const alt = this.alt || 'Image';
+                const width = this.offsetWidth || 400;
+                const height = this.offsetHeight || 300;
+                this.src = `https://via.placeholder.com/${width}x${height}?text=${encodeURIComponent(alt)}`;
+            }
         });
     });
     
-    // Bootstrap tooltip initialization
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-    
-    // Image lazy loading fallback
-    document.addEventListener("DOMContentLoaded", function() {
-        if ('loading' in HTMLImageElement.prototype) {
-            const images = document.querySelectorAll('img[loading="lazy"]');
-            images.forEach(img => {
+    // Lazy loading support check
+    if ('loading' in HTMLImageElement.prototype) {
+        const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+        lazyImages.forEach(img => {
+            if (img.dataset.src) {
                 img.src = img.dataset.src;
+            }
+        });
+    }
+});
+
+// Mobile menu fixes and touch improvements
+document.addEventListener("DOMContentLoaded", function() {
+    // Improve mobile touch experience
+    if ('ontouchstart' in window) {
+        // Add touch-friendly classes
+        document.body.classList.add('touch-device');
+        
+        // Handle hover effects on touch devices
+        const hoverCards = document.querySelectorAll('.hover-card');
+        hoverCards.forEach(card => {
+            card.addEventListener('touchstart', function() {
+                this.classList.add('touch-hover');
             });
-        } else {
-            // Fallback for browsers that don't support lazy loading
-            const script = document.createElement('script');
-            script.src = "{% static 'js/lazysizes.min.js' %}";
-            document.body.appendChild(script);
-        }
-    });
+            card.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.classList.remove('touch-hover');
+                }, 300);
+            });
+        });
+    }
+});
 </script>
 {% endblock %}

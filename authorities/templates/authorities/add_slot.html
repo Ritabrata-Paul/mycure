@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block title %}Add New Time Slot - {{ authority.name }}{% endblock %}
-
 {% block extra_css %}
 <style>
     .select-dropdown {
@@ -105,6 +103,26 @@
         color: #856404;
         font-weight: 500;
     }
+    
+    .doctor-item.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    .no-doctors-message {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        text-align: center;
+    }
+    
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 1rem;
+    }
 </style>
 {% endblock %}
 
@@ -140,7 +158,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="card-body p-4">
                     <!-- Messages -->
                     {% if messages %}
@@ -178,7 +196,7 @@
                                     <div id="servicesCheckboxes">
                                         {% if form.services.field.queryset %}
                                             {% for choice in form.services %}
-                                                <div class="checkbox-dropdown-item service-item">
+                                                <div class="checkbox-dropdown-item service-item" data-service-id="{{ choice.choice_value.id }}">
                                                     {{ choice.tag|safe }}
                                                     <label class="form-check-label ms-2" for="{{ choice.id_for_label }}">
                                                         <strong>{{ choice.choice_label }}</strong>
@@ -205,7 +223,7 @@
 
                         <!-- Doctors Selection Section -->
                         <div class="form-section">
-                            <h6><i class="fas fa-user-md me-2"></i>Doctors Assignment (Optional)</h6>
+                            <h6><i class="fas fa-user-md me-2"></i>Doctors Assignment</h6>
                             {% if form.doctors.errors %}
                                 <div class="alert alert-danger">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
@@ -215,38 +233,30 @@
                             
                             <div class="select-dropdown">
                                 <button type="button" class="dropdown-toggle" id="doctorsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span id="doctorsPlaceholder">Select Doctors (Optional)</span>
+                                    <span id="doctorsPlaceholder">Select Services First</span>
                                     <span class="selected-count ms-2" id="doctorsCount" style="display: none;">0 selected</span>
                                 </button>
                                 <div class="dropdown-menu checkbox-dropdown-content w-100" aria-labelledby="doctorsDropdown">
-                                    <div class="search-box mb-2">
+                                    <div class="loading-spinner" id="loadingSpinner">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span class="ms-2">Loading doctors...</span>
+                                    </div>
+                                    <div class="search-box mb-2" id="doctorsSearchBox" style="display: none;">
                                         <input type="text" class="form-control form-control-sm" placeholder="Search doctors..." id="doctorsSearch">
                                     </div>
                                     <div id="doctorsCheckboxes">
-                                        {% if form.doctors.field.queryset %}
-                                            {% for choice in form.doctors %}
-                                                <div class="checkbox-dropdown-item doctor-item">
-                                                    {{ choice.tag|safe }}
-                                                    <label class="form-check-label ms-2" for="{{ choice.id_for_label }}">
-                                                        <strong>{{ choice.choice_label }}</strong>
-                                                        {% if choice.choice_value.specialization %}
-                                                            <br><small class="text-muted">{{ choice.choice_value.specialization }}</small>
-                                                        {% endif %}
-                                                    </label>
-                                                </div>
-                                            {% endfor %}
-                                        {% else %}
-                                            <div class="text-center text-muted py-3">
-                                                <i class="fas fa-info-circle me-2"></i>
-                                                No doctors available. You can add doctors later.
-                                            </div>
-                                        {% endif %}
+                                        <div class="text-center text-muted py-3" id="selectServicesMessage">
+                                            <i class="fas fa-arrow-up me-2"></i>
+                                            Please select services first to see available doctors
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-text mt-2">
+                            <div class="form-text mt-2" id="doctorsHelpText">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Assign specific doctors to this time slot, or leave empty for general availability
+                                Available doctors will be filtered based on selected services
                             </div>
                         </div>
 
@@ -322,7 +332,6 @@
                                         </small>
                                     </div>
                                 </div>
-
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-toggle-on me-1"></i>Status
@@ -354,7 +363,7 @@
                             <a href="{% url 'manage_slots' %}" class="btn btn-outline-secondary btn-lg">
                                 <i class="fas fa-arrow-left me-2"></i>Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-4" id="submitBtn">
                                 <i class="fas fa-save me-2"></i>Create Time Slot
                             </button>
                         </div>
@@ -367,17 +376,25 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Services dropdown functionality
+    // Elements
     const servicesCheckboxes = document.querySelectorAll('#servicesCheckboxes input[type="checkbox"]');
     const servicesPlaceholder = document.getElementById('servicesPlaceholder');
     const servicesCount = document.getElementById('servicesCount');
     const servicesSearch = document.getElementById('servicesSearch');
     
-    // Doctors dropdown functionality
-    const doctorsCheckboxes = document.querySelectorAll('#doctorsCheckboxes input[type="checkbox"]');
+    const doctorsCheckboxes = document.getElementById('doctorsCheckboxes');
     const doctorsPlaceholder = document.getElementById('doctorsPlaceholder');
     const doctorsCount = document.getElementById('doctorsCount');
     const doctorsSearch = document.getElementById('doctorsSearch');
+    const doctorsSearchBox = document.getElementById('doctorsSearchBox');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const selectServicesMessage = document.getElementById('selectServicesMessage');
+    const doctorsHelpText = document.getElementById('doctorsHelpText');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Store all available doctors data
+    let allDoctorsData = [];
+    let currentDoctorCheckboxes = [];
     
     // Update services display
     function updateServicesDisplay() {
@@ -396,16 +413,152 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update doctors display
     function updateDoctorsDisplay() {
-        const selectedDoctors = Array.from(doctorsCheckboxes).filter(cb => cb.checked);
+        const selectedDoctors = Array.from(currentDoctorCheckboxes).filter(cb => cb.checked);
         const count = selectedDoctors.length;
         
         if (count === 0) {
-            doctorsPlaceholder.textContent = 'Select Doctors (Optional)';
+            doctorsPlaceholder.textContent = 'No doctors selected';
             doctorsCount.style.display = 'none';
         } else {
             doctorsPlaceholder.textContent = `${count} doctor${count > 1 ? 's' : ''} selected`;
             doctorsCount.textContent = `${count} selected`;
             doctorsCount.style.display = 'inline';
+        }
+    }
+    
+    // Fetch available doctors based on selected services
+    function fetchAvailableDoctors() {
+        const selectedServices = Array.from(servicesCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        if (selectedServices.length === 0) {
+            // Reset doctors section
+            doctorsCheckboxes.innerHTML = `
+                <div class="text-center text-muted py-3" id="selectServicesMessage">
+                    <i class="fas fa-arrow-up me-2"></i>
+                    Please select services first to see available doctors
+                </div>
+            `;
+            doctorsPlaceholder.textContent = 'Select Services First';
+            doctorsCount.style.display = 'none';
+            doctorsSearchBox.style.display = 'none';
+            currentDoctorCheckboxes = [];
+            updateSubmitButton();
+            return;
+        }
+        
+        // Show loading
+        loadingSpinner.style.display = 'block';
+        doctorsSearchBox.style.display = 'none';
+        
+        // Make AJAX request
+        const params = new URLSearchParams();
+        selectedServices.forEach(serviceId => {
+            params.append('services[]', serviceId);
+        });
+        
+        fetch(`{% url 'get_available_doctors_for_services' %}?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingSpinner.style.display = 'none';
+            
+            if (data.success && data.doctors && data.doctors.length > 0) {
+                // Store doctors data
+                allDoctorsData = data.doctors;
+                
+                // Generate doctors checkboxes
+                const doctorsHTML = data.doctors.map(doctor => `
+                    <div class="checkbox-dropdown-item doctor-item" data-doctor-id="${doctor.id}">
+                        <input type="checkbox" 
+                               name="doctors" 
+                               value="${doctor.id}" 
+                               id="id_doctors_${doctor.id}"
+                               class="form-check-input">
+                        <label class="form-check-label ms-2" for="id_doctors_${doctor.id}">
+                            <strong>${doctor.name}</strong>
+                            ${doctor.specialization ? `<br><small class="text-muted">${doctor.specialization}</small>` : ''}
+                        </label>
+                    </div>
+                `).join('');
+                
+                doctorsCheckboxes.innerHTML = doctorsHTML;
+                doctorsSearchBox.style.display = 'block';
+                doctorsPlaceholder.textContent = 'Select Doctors';
+                
+                // Update current doctor checkboxes reference
+                currentDoctorCheckboxes = document.querySelectorAll('#doctorsCheckboxes input[type="checkbox"]');
+                
+                // Add event listeners to new checkboxes
+                currentDoctorCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        updateDoctorsDisplay();
+                        updateSubmitButton();
+                    });
+                });
+                
+                // Update help text
+                doctorsHelpText.innerHTML = `
+                    <i class="fas fa-check-circle me-1 text-success"></i>
+                    ${data.doctors.length} doctor${data.doctors.length > 1 ? 's' : ''} available for selected services
+                `;
+                
+            } else {
+                // No doctors available
+                doctorsCheckboxes.innerHTML = `
+                    <div class="no-doctors-message">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>No doctors available</strong>
+                        <p class="mb-0 mt-2">The selected services don't have any assigned doctors. Please assign doctors to these services first, or choose different services.</p>
+                    </div>
+                `;
+                doctorsPlaceholder.textContent = 'No Doctors Available';
+                doctorsCount.style.display = 'none';
+                doctorsSearchBox.style.display = 'none';
+                currentDoctorCheckboxes = [];
+                
+                // Update help text
+                doctorsHelpText.innerHTML = `
+                    <i class="fas fa-exclamation-triangle me-1 text-warning"></i>
+                    No doctors assigned to selected services. Time slot cannot be created.
+                `;
+            }
+            
+            updateSubmitButton();
+        })
+        .catch(error => {
+            console.error('Error fetching doctors:', error);
+            loadingSpinner.style.display = 'none';
+            doctorsCheckboxes.innerHTML = `
+                <div class="text-center text-danger py-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error loading doctors. Please try again.
+                </div>
+            `;
+            updateSubmitButton();
+        });
+    }
+    
+    // Update submit button state
+    function updateSubmitButton() {
+        const selectedServices = Array.from(servicesCheckboxes).filter(cb => cb.checked);
+        const hasAvailableDoctors = allDoctorsData.length > 0;
+        
+        if (selectedServices.length === 0) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Select Services First';
+        } else if (!hasAvailableDoctors) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-user-times me-2"></i>No Doctors Available';
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Create Time Slot';
         }
     }
     
@@ -439,18 +592,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add event listeners
+    // Add event listeners to services
     servicesCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateServicesDisplay);
+        checkbox.addEventListener('change', function() {
+            updateServicesDisplay();
+            fetchAvailableDoctors();
+        });
     });
-    
-    doctorsCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateDoctorsDisplay);
-    });
-    
-    // Initialize displays
-    updateServicesDisplay();
-    updateDoctorsDisplay();
     
     // Prevent dropdown from closing when clicking inside
     document.querySelectorAll('.checkbox-dropdown-content').forEach(dropdown => {
@@ -458,6 +606,27 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
         });
     });
+    
+    // Form submission validation
+    document.getElementById('slotForm').addEventListener('submit', function(e) {
+        const selectedServices = Array.from(servicesCheckboxes).filter(cb => cb.checked);
+        
+        if (selectedServices.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one service.');
+            return false;
+        }
+        
+        if (allDoctorsData.length === 0) {
+            e.preventDefault();
+            alert('Cannot create time slot: No doctors are assigned to the selected services.');
+            return false;
+        }
+    });
+    
+    // Initial setup
+    updateServicesDisplay();
+    updateSubmitButton();
 });
 </script>
 {% endblock %}

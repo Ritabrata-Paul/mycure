@@ -86,13 +86,24 @@ class Service(models.Model):
     authority = models.ForeignKey(Authority, on_delete=models.CASCADE, related_name='services')
     name = models.CharField(max_length=255)
     description = models.TextField()
-    doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, related_name='services', blank=True, null=True)
+    # Changed from ForeignKey to ManyToManyField to support multiple doctors
+    doctors = models.ManyToManyField(Doctor, related_name='services', blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     duration_minutes = models.PositiveIntegerField(default=30)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
+    def get_doctors_display(self):
+        """Return a formatted string of assigned doctors"""
+        doctors_list = list(self.doctors.all())
+        if not doctors_list:
+            return "No doctors assigned"
+        elif len(doctors_list) == 1:
+            return str(doctors_list[0])
+        else:
+            return f"{doctors_list[0]} +{len(doctors_list) - 1} more"
+    
     def __str__(self):
         return f"{self.name} - {self.authority.name}"
         

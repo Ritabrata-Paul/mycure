@@ -33,6 +33,9 @@ urlpatterns = [
     path('slot/<int:slot_id>/edit/', views.edit_slot_view, name='edit_slot'),
     path('slot/<int:slot_id>/delete/', views.delete_slot_view, name='delete_slot'),
     path('slot/<int:slot_id>/change-status/', views.change_slot_status, name='change_slot_status'),  # Added this line
+    path('get-available-doctors/', views.get_available_doctors_for_services, name='get_available_doctors_for_services'),
+
+    
     
     # Profile management
     path('profile/', views.authority_profile_view, name='authority_profile'),

@@ -67,13 +67,20 @@ def service_detail_view(request, service_id):
     """View service details"""
     service = get_object_or_404(Service, id=service_id, is_active=True)
     authority = service.authority
-    doctor = service.doctor
-    time_slots = TimeSlot.objects.filter(service=service, is_active=True)
+    
+    # Get all doctors associated with this service (many-to-many relationship)
+    doctors = service.doctors.filter(is_active=True)
+    
+    # Get time slots for this service
+    time_slots = TimeSlot.objects.filter(
+        services=service, 
+        is_active=True
+    ).order_by('weekday', 'start_time')
     
     context = {
         'service': service,
         'authority': authority,
-        'doctor': doctor,
+        'doctors': doctors,  # Pass all doctors instead of single doctor
         'time_slots': time_slots,
     }
     return render(request, 'appointments/service_detail.html', context)
@@ -92,7 +99,10 @@ def book_appointment_view(request, service_id):
             appointment.user = request.user
             appointment.authority = authority
             appointment.service = service
-            appointment.doctor = service.doctor
+            
+            # Get the first available doctor for this service, or None if no doctors
+            doctors = service.doctors.filter(is_active=True).first()
+            appointment.doctor = doctors if doctors else None
             
             # Add patient information to appointment
             appointment.patient_name = form.cleaned_data.get('patient_name')
@@ -212,7 +222,7 @@ def send_appointment_notifications(request, appointment, appointment_date):
     user = request.user
     authority = appointment.authority
     service = appointment.service
-    doctor = appointment.doctor
+    doctor = appointment.doctor  # This is now correctly assigned
     
     # Email subject
     subject = f"New Appointment Booking - {service.name}"
@@ -228,7 +238,7 @@ def send_appointment_notifications(request, appointment, appointment_date):
         - Name: {appointment.patient_name}
         - Email: {appointment.patient_email}
         - Phone: {appointment.patient_phone}
-        - Gender: {appointment.get_gender_display_full()}
+        - Gender: {appointment.get_patient_gender_display() if hasattr(appointment, 'get_patient_gender_display') else appointment.patient_gender}
         - Age: {appointment.patient_age} years
         
         Appointment Details:

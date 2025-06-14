@@ -15,7 +15,7 @@
                     <li class="breadcrumb-item active" aria-current="page">{{ service.name }}</li>
                 </ol>
             </nav>
-
+            
             <div class="row mt-3">
                 <div class="col-md-8">
                     <h2 class="mb-2">{{ service.name }}</h2>
@@ -25,7 +25,14 @@
                     </p>
                     <p class="mb-1">
                         <i class="fas fa-stethoscope text-primary me-2"></i>
-                        {% if doctor %}Dr. {{ doctor.name }} - {{ doctor.specialization }}{% else %}General Service{% endif %}
+                        {% if doctors %}
+                            {% for doctor in doctors %}
+                                Dr. {{ doctor.name }}{% if doctor.specialization %} - {{ doctor.specialization }}{% endif %}
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            General Service
+                        {% endif %}
                     </p>
                     <p class="mb-1">
                         <i class="fas fa-clock text-primary me-2"></i>
@@ -105,35 +112,45 @@
         </div>
     </div>
 
-    <!-- Doctor Information (if assigned) -->
-    {% if doctor %}
+    <!-- Doctor Information -->
+    {% if doctors %}
         <div class="card shadow mb-5">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">About Dr. {{ doctor.name }}</h5>
+                <h5 class="mb-0">
+                    {% if doctors.count == 1 %}
+                        About Dr. {{ doctors.first.name }}
+                    {% else %}
+                        Available Doctors ({{ doctors.count }})
+                    {% endif %}
+                </h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 text-center mb-3 mb-md-0">
-                        {% if doctor.photo %}
-                            <img src="{{ doctor.photo.url }}" class="rounded-circle" width="150" height="150" alt="{{ doctor.name }}">
-                        {% else %}
-                            <i class="fas fa-user-md fa-6x text-secondary"></i>
-                        {% endif %}
+                {% for doctor in doctors %}
+                    <div class="row{% if not forloop.last %} mb-4 pb-4 border-bottom{% endif %}">
+                        <div class="col-md-3 text-center mb-3 mb-md-0">
+                            {% if doctor.photo %}
+                                <img src="{{ doctor.photo.url }}" class="rounded-circle" width="150" height="150" alt="{{ doctor.name }}">
+                            {% else %}
+                                <i class="fas fa-user-md fa-6x text-secondary"></i>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h4>Dr. {{ doctor.name }}</h4>
+                            <p class="text-muted mb-3">{{ doctor.specialization }}</p>
+                            <p class="mb-2">
+                                <i class="fas fa-award text-primary me-2"></i>
+                                Experience: {{ doctor.experience_years }} years
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-graduation-cap text-primary me-2"></i>
+                                {{ doctor.qualifications }}
+                            </p>
+                            {% if doctor.bio %}
+                                <p>{{ doctor.bio }}</p>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="col-md-9">
-                        <h4>Dr. {{ doctor.name }}</h4>
-                        <p class="text-muted mb-3">{{ doctor.specialization }}</p>
-                        <p class="mb-2">
-                            <i class="fas fa-award text-primary me-2"></i>
-                            Experience: {{ doctor.experience_years }} years
-                        </p>
-                        <p class="mb-2">
-                            <i class="fas fa-graduation-cap text-primary me-2"></i>
-                            {{ doctor.qualifications }}
-                        </p>
-                        <p>{{ doctor.bio }}</p>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     {% endif %}

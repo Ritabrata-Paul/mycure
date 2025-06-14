@@ -906,7 +906,7 @@
 <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 <!-- Custom JS -->
 <script>
-  // Stats counter animation
+  // Stats counter animation - Mobile-friendly version
   $(document).ready(function() {
     // Function to animate counting up
     function animateCounter(element, start, end, duration) {
@@ -935,15 +935,45 @@
       window.requestAnimationFrame(step);
     }
     
-    // Check if element is in viewport
+    // Improved viewport detection for mobile devices
     function isElementInViewport(el) {
       const rect = el.getBoundingClientRect();
+      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+      const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+      
+      // Check if element is at least 50% visible (more forgiving for mobile)
       return (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        rect.top < windowHeight * 0.8 && // Element is 80% from top
+        rect.bottom > windowHeight * 0.2 && // Element is 20% from bottom
+        rect.left >= -50 && // Allow some horizontal tolerance
+        rect.right <= windowWidth + 50
       );
+    }
+    
+    // Alternative method using Intersection Observer API (more reliable for mobile)
+    function setupIntersectionObserver() {
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && !animated) {
+              startAnimation();
+            }
+          });
+        }, {
+          // Trigger when 30% of the element is visible
+          threshold: 0.3,
+          // Add some margin for better mobile detection
+          rootMargin: '50px 0px'
+        });
+        
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) {
+          observer.observe(statsSection);
+        }
+        
+        return true; // Observer was set up
+      }
+      return false; // Observer not supported
     }
     
     // Store the final values from the HTML
@@ -968,23 +998,169 @@
     // Flag to ensure animation only happens once
     let animated = false;
     
-    // Function to check if stats section is visible and trigger animation
+    // Function to start the animation
+    function startAnimation() {
+      if (animated) return;
+      animated = true;
+      
+      statElements.each(function(index) {
+        const duration = 2000; // Animation duration in milliseconds
+        animateCounter($(this), 0, finalValues[index], duration);
+      });
+    }
+    
+    // Function to check if stats section is visible (fallback method)
     function checkAnimation() {
       const statsSection = $('.stats-section');
       
-      if (isElementInViewport(statsSection[0]) && !animated) {
-        animated = true;
-        
-        statElements.each(function(index) {
-          const duration = 2000; // Animation duration in milliseconds
-          animateCounter($(this), 0, finalValues[index], duration);
-        });
+      if (statsSection.length && isElementInViewport(statsSection[0]) && !animated) {
+        startAnimation();
       }
     }
     
-    // Check on scroll and on page load
-    $(window).on('scroll', checkAnimation);
-    checkAnimation(); // Check on page load
+    // Try to use Intersection Observer first (modern approach)
+    const observerSetup = setupIntersectionObserver();
+    
+    // If Intersection Observer is not supported, use scroll event (fallback)
+    if (!observerSetup) {
+      // Throttle scroll events for better performance
+      let scrollTimeout;
+      $(window).on('scroll', function() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(checkAnimation, 50);
+      });
+      
+      // Also check on resize for mobile orientation changes
+      $(window).on('resize', function() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(checkAnimation, 100);
+      });
+      
+      // Check on page load
+      checkAnimation();
+    }
+    
+    // Additional check after a delay to catch edge cases
+    setTimeout(function() {
+      if (!animated) {
+        checkAnimation();
+      }
+    }, 1000);
+    
+    // Smooth scrolling for anchor links (bonus feature)
+    $('a[href^="#"]').on('click', function(e) {
+      e.preventDefault();
+      const target = $(this.hash);
+      if (target.length) {
+        $('html, body').animate({
+          scrollTop: target.offset().top - 100
+        }, 800);
+      }
+    });
+    
+    // Add loading animation for feature cards (bonus feature)
+    function animateFeatureCards() {
+      const cards = $('.feature-card, .authority-card');
+      cards.each(function(index) {
+        const card = $(this);
+        setTimeout(function() {
+          card.addClass('animate-in');
+        }, index * 100);
+      });
+    }
+    
+    // Initialize testimonial slider if testimonials section exists
+    if ($('.testimonials-slider').length) {
+      $('.testimonials-slider').slick({
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 4000,
+        responsive: [
+          {
+            breakpoint: 992,
+            settings: {
+              slidesToShow: 2,
+              slidesToScroll: 1
+            }
+          },
+          {
+            breakpoint: 768,
+            settings: {
+              slidesToShow: 1,
+              slidesToScroll: 1
+            }
+          }
+        ]
+      });
+    }
+    
+    // Mobile menu toggle if needed
+    $('.navbar-toggler').on('click', function() {
+      $(this).toggleClass('active');
+    });
+    
+    // Add scroll effect to navbar
+    $(window).scroll(function() {
+      if ($(window).scrollTop() > 50) {
+        $('.navbar').addClass('scrolled');
+      } else {
+        $('.navbar').removeClass('scrolled');
+      }
+    });
+    
+    // Initialize animations on page load
+    setTimeout(animateFeatureCards, 500);
   });
+  
+  // Additional CSS for animations (add this to your CSS)
+  const additionalCSS = `
+    <style>
+    .feature-card, .authority-card {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s ease;
+    }
+    
+    .feature-card.animate-in, .authority-card.animate-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .navbar.scrolled {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .navbar-toggler.active {
+      transform: rotate(90deg);
+    }
+    
+    @media (max-width: 768px) {
+      .hero-section h1 {
+        font-size: 2.5rem !important;
+      }
+      
+      .hero-section p {
+        font-size: 1.1rem !important;
+      }
+      
+      .stats-section {
+        padding: 60px 0 !important;
+      }
+      
+      .section-header h2 {
+        font-size: 2rem !important;
+      }
+    }
+    </style>
+  `;
+  
+  // Inject additional CSS
+  $('head').append(additionalCSS);
 </script>
 {% endblock %}

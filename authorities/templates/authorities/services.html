@@ -60,7 +60,7 @@
                     <label for="doctor" class="form-label">Doctor</label>
                     <select name="doctor" id="doctor" class="form-select">
                         <option value="">All Doctors</option>
-                        {% for doctor in authority.doctors.all %}
+                        {% for doctor in doctors %}
                         <option value="{{ doctor.id }}" {% if current_filters.doctor == doctor.id|stringformat:"s" %}selected{% endif %}>{{ doctor.name }}</option>
                         {% endfor %}
                     </select>
@@ -138,17 +138,19 @@
                                 </span>
                                 <span>{{ service.duration_minutes }} minutes</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="mb-2">
                                 <span>
-                                    <i class="bi bi-person-badge me-1 text-primary"></i> Doctor:
+                                    <i class="bi bi-person-badge me-1 text-primary"></i> Doctors:
                                 </span>
-                                <span>
-                                    {% if service.doctor %}
-                                    {{ service.doctor.name }}
+                                <div class="mt-1">
+                                    {% if service.doctors.all %}
+                                        {% for doctor in service.doctors.all %}
+                                            <span class="badge bg-primary me-1 mb-1">{{ doctor.name }}</span>
+                                        {% endfor %}
                                     {% else %}
-                                    <span class="text-muted">Not assigned</span>
+                                        <span class="text-muted small">No doctors assigned</span>
                                     {% endif %}
-                                </span>
+                                </div>
                             </div>
                         </div>
                         <div class="card-footer bg-light">
